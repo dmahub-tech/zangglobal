@@ -1,2 +1,0 @@
-test@example.com
-Password@1234
