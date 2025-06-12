@@ -33,7 +33,6 @@ const ProductDetail = () => {
   const navigate = useNavigate();
   const [product, setProduct] = useState(null);
   const [selectedImage, setSelectedImage] = useState(0);
-  const [quantity, setQuantity] = useState(1);
   const [stockStatus, setStockStatus] = useState(null);
   const [recentlyViewed, setRecentlyViewed] = useState([]);
   const [reviews, setReviews] = useState([]);
@@ -99,12 +98,7 @@ const ProductDetail = () => {
     setStockStatus({ status, color, stock });
   };
 
-  const handleQuantityChange = (change) => {
-    const newQuantity = quantity + change;
-    if (newQuantity >= 1 && newQuantity <= (stockStatus?.stock || 1)) {
-      setQuantity(newQuantity);
-    }
-  };
+
 
   const submitReview = async (data) => {
     try {
@@ -358,35 +352,11 @@ const ProductDetail = () => {
                   </div>
                 </div>
 
-                {/* Quantity Selector */}
-                <div className="flex items-center space-x-4 pt-2">
-                  <span className="text-gray-700 font-medium">Quantity:</span>
-                  <div className="flex items-center border rounded-lg overflow-hidden">
-                    <button
-                      onClick={() => handleQuantityChange(-1)}
-                      disabled={quantity <= 1}
-                      className="px-3 py-2 bg-gray-100 text-gray-600 hover:bg-gray-200 disabled:opacity-30"
-                    >
-                      <FaMinus />
-                    </button>
-                    <span className="px-4 py-2 text-center w-12 font-medium">
-                      {quantity}
-                    </span>
-                    <button
-                      onClick={() => handleQuantityChange(1)}
-                      disabled={quantity >= stockStatus?.stock}
-                      className="px-3 py-2 bg-gray-100 text-gray-600 hover:bg-gray-200 disabled:opacity-30"
-                    >
-                      <FaPlus />
-                    </button>
-                  </div>
-                </div>
-
+            
                 {/* Action Buttons */}
                 <div className="grid grid-cols-2 gap-4 pt-6">
                   <AddToCart 
                     product={product} 
-                    quantity={quantity} 
                     className="w-full"
                   />
                   <button
