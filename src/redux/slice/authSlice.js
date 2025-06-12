@@ -1,72 +1,71 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "../../config/api";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
 
-// User Login
-export const loginUser = createAsyncThunk("auth/login", async (userData, { rejectWithValue }) => {
-  try {
-    const response = await api.post("/auth/login", userData);
+// ✅ Login
+export const loginUser = createAsyncThunk(
+  "auth/login",
+  async (userData, { rejectWithValue }) => {
+    try {
+      const res = await api.post("/auth/login", userData);
+      const { token, user, userId } = res.data;
 
-    // Save token and user data in localStorage
-    localStorage.setItem("token", response.data.token);
-    localStorage.setItem("user", JSON.stringify(response.data.user));
-    localStorage.setItem("userId", response.data.userId); // Store userId separately
-    toast.success("Login Successful")
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("userId", userId);
 
-    return response.data;
-  } catch (error) {
-    return rejectWithValue(error.response?.data || "Login failed");
+      toast.success("Login Successful");
+      return res.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || "Login failed");
+    }
   }
-});
+);
 
-// User Registration
-export const registerUser = createAsyncThunk("auth/register", async (userData, { rejectWithValue }) => {
-  // const navigate = useNavigate()
-  try {
-    const response = await api.post("/auth/register", userData);
+// ✅ Register
+export const registerUser = createAsyncThunk(
+  "auth/register",
+  async (userData, { rejectWithValue }) => {
+    try {
+      const res = await api.post("/auth/register", userData);
+      const { token, user } = res.data;
 
-    console.log("Registration Response:", response.data);
-    localStorage.setItem("token", response.data.token);
-    localStorage.setItem("user", JSON.stringify(response.data.user));
-    localStorage.setItem("userId", response.data.user.userId);
-    toast.success("Welcome to Zang Global. Login to continue")
-    // navigate('/login')
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("userId", user.userId);
 
-    return response.data;
-  } catch (error) {
-    console.error("Registration Error:", error.response?.data || error.message);
-    return rejectWithValue(error.response?.data?.message || "Registration failed");
+      toast.success("Welcome to Zang Global. Login to continue");
+      return res.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || "Registration failed");
+    }
   }
-});
+);
 
-// Fetch User By ID (After Login)
-export const fetchUser = createAsyncThunk("auth/fetchUser", async (_, { rejectWithValue }) => {
-  try {
-    const token = localStorage.getItem("token");
-    const userId = localStorage.getItem("userId");
+// ✅ Fetch user
+export const fetchUser = createAsyncThunk(
+  "auth/fetchUser",
+  async (_, { rejectWithValue }) => {
+    try {
+      const token = localStorage.getItem("token");
+      const userId = localStorage.getItem("userId");
 
-    if (!token) throw new Error("No token found");
-    if (!userId){
-      
-      console.log("user Id not reachable")
-      throw new Error("No user ID found")
-    };
+      if (!token) throw new Error("No token found");
+      if (!userId) throw new Error("No user ID found");
 
-    const response = await api.get(`/auth/profile/${userId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+      const res = await api.get(`/auth/profile/${userId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-    // Update localStorage with fresh user data
-    localStorage.setItem("user", JSON.stringify(response.data));
-
-    return response.data;
-  } catch (error) {
-    return rejectWithValue(error.response?.data?.message || "Failed to fetch user");
+      localStorage.setItem("user", JSON.stringify(res.data));
+      return res.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || err.message || "Failed to fetch user");
+    }
   }
-});
+);
 
-// Logout
+// ✅ Slice
 const authSlice = createSlice({
   name: "auth",
   initialState: {
@@ -77,27 +76,57 @@ const authSlice = createSlice({
   },
   reducers: {
     logout: (state) => {
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      localStorage.removeItem("cart");
-
-      localStorage.removeItem("userId"); // Clear userId
+      ["token", "user", "userId", "cart"].forEach((key) =>
+        localStorage.removeItem(key)
+      );
       state.user = null;
       state.token = null;
     },
   },
   extraReducers: (builder) => {
     builder
+      // Login
+      .addCase(loginUser.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(loginUser.fulfilled, (state, action) => {
+        state.loading = false;
         state.user = action.payload.user;
         state.token = action.payload.token;
+      })
+      .addCase(loginUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // Register
+      .addCase(registerUser.pending, (state) => {
+        state.loading = true;
+        state.error = null;
       })
       .addCase(registerUser.fulfilled, (state, action) => {
+        state.loading = false;
         state.user = action.payload.user;
         state.token = action.payload.token;
       })
+      .addCase(registerUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // Fetch User
+      .addCase(fetchUser.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(fetchUser.fulfilled, (state, action) => {
+        state.loading = false;
         state.user = action.payload;
+      })
+      .addCase(fetchUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
   },
 });

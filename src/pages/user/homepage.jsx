@@ -1,207 +1,330 @@
-import React, {
-  useState,
-  useEffect,
-  useMemo,
-  useCallback
-} from 'react';
-import CartItems from "../../components/user/cart/Cartitems";
-import { fetchProducts } from '../../config/api';
-import ProductCard from '../../components/user/ProductCard';
+import React, { useState, useEffect, useMemo, useCallback, lazy, Suspense } from 'react';
 import { useDispatch } from 'react-redux';
-import { getProducts } from '../../redux/slice/productSlice';
+import { Link } from 'react-router-dom';
+import { FiArrowRight, FiShoppingCart, FiX } from 'react-icons/fi';
+import { motion, AnimatePresence } from 'framer-motion';
+import { debounce } from 'lodash-es';
 
-// 1. Move slides constant outside to avoid recreation on each render
+// Lazy load heavy components
+const CartItems = lazy(() => import('../../components/user/cart/Cartitems'));
+const ProductCard = lazy(() => import('../../components/user/ProductCard'));
+
+// API functions should be imported dynamically when needed
+let fetchProducts;
+
+// Optimized carousel slides with preloaded and sized images
 const carouselSlides = [
   {
-    title: "50% OFF",
-    description: "Surprise your loved ones with our Special Gifts",
-    image: "https://images.pexels.com/photos/269887/pexels-photo-269887.jpeg"
+    title: "50% OFF Summer Sale",
+    description: "Limited time offers on curated gift selections",
+    image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=1200&h=600&auto=format&fit=crop",
+    cta: "Shop Now",
+    ctaLink: "/summer-sale"
   },
   {
     title: "New Arrivals",
-    description: "Check out our latest collection of gifts",
-    image: "https://i.pinimg.com/originals/96/24/6e/96246e3c133e6cb5ae4c7843f9e45b22.jpg"
+    description: "Discover our latest collection of thoughtful gifts",
+    image: "https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=1200&h=600&auto=format&fit=crop",
+    cta: "Explore New Items",
+    ctaLink: "/new-arrivals"
   },
   {
-    title: "Special Offers",
-    description: "Limited time deals on selected items",
-    image: "https://images.pexels.com/photos/159711/books-bookstore-book-reading-159711.jpeg"
+    title: "Premium Collection",
+    description: "Elevate your gifting with our luxury selections",
+    image: "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1200&h=600&auto=format&fit=crop",
+    cta: "View Collection",
+    ctaLink: "/premium"
   }
 ];
 
-// 2. Memoize Carousel
-const Carousel = React.memo(({ slides, currentSlide }) => (
-  <div className="relative w-full">
-    <div
-      className="h-48 sm:h-64 md:h-80 lg:h-96 w-full bg-cover bg-center transition-all duration-300"
-      style={{ backgroundImage: `url(${slides[currentSlide].image})` }}
-    >
-      <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-        <div className="flex flex-col items-center justify-center text-white p-4 max-w-4xl mx-auto text-center">
-          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-semibold">
-            {slides[currentSlide].title}
-          </h2>
-          <p className="text-xs sm:text-sm md:text-base mt-2 max-w-md">
-            {slides[currentSlide].description}
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
-));
+// Preload first carousel image
+const preloadImage = (url) => {
+  const img = new Image();
+  img.src = url;
+};
+preloadImage(carouselSlides[0].image);
 
-// 3. Memoize scroll progress bar
+// Simplified Carousel with optimized animations
+const Carousel = React.memo(({ slides, currentSlide }) => {
+  return (
+    <div className="relative w-full overflow-hidden aspect-[2/1]">
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={currentSlide}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.5 }}
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: `url(${slides[currentSlide].image})` }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-black/20 flex items-center">
+            <div className="container mx-auto px-6">
+              <motion.div
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.2 }}
+                className="max-w-xl text-white"
+              >
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 leading-tight">
+                  {slides[currentSlide].title}
+                </h2>
+                <p className="text-lg sm:text-xl mb-6 opacity-90">
+                  {slides[currentSlide].description}
+                </p>
+                <Link
+                  to={slides[currentSlide].ctaLink}
+                  className="inline-flex items-center px-6 py-3 bg-primary hover:bg-primary-dark rounded-lg font-medium transition-all duration-300 group"
+                  prefetch="intent"
+                >
+                  {slides[currentSlide].cta}
+                  <FiArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
+                </Link>
+              </motion.div>
+            </div>
+          </div>
+        </motion.div>
+      </AnimatePresence>
+    </div>
+  );
+});
+
+// Optimized Scroll Progress
 const ScrollProgress = React.memo(() => {
   const [scrollProgress, setScrollProgress] = useState(0);
 
   useEffect(() => {
-    let ticking = false;
-
     const updateScrollProgress = () => {
       const currentScroll = window.scrollY;
-      const scrollHeight =
-        document.documentElement.scrollHeight - window.innerHeight;
-      const progress = (currentScroll / scrollHeight) * 100;
-
-      setScrollProgress((prev) =>
-        Math.abs(prev - progress) > 0.1 ? progress : prev
-      );
-      ticking = false;
-    };
-
-    const onScroll = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(updateScrollProgress);
-        ticking = true;
+      const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+      if (scrollHeight > 0) {
+        setScrollProgress(Math.min((currentScroll / scrollHeight) * 100, 100));
       }
     };
 
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
+    const debouncedScroll = debounce(updateScrollProgress, 16);
+    window.addEventListener('scroll', debouncedScroll, { passive: true });
+    return () => window.removeEventListener('scroll', debouncedScroll);
   }, []);
 
   return (
     <div
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        width: `${scrollProgress}%`,
-        height: '4px',
-        backgroundColor: '#2e3192',
-        transition: 'width 0.3s ease-out',
-        zIndex: 1000,
-      }}
+      className="fixed top-0 left-0 h-1 bg-primary z-50 transition-all duration-100"
+      style={{ width: `${scrollProgress}%` }}
     />
   );
 });
 
-// 4. Memoized Cart overlay
-const CartOverlay = React.memo( (onClose) => (
-  <div className="fixed inset-0 w-full h-full bg-white shadow-2xl z-50 transform transition-all duration-300 ease-in-out sm:w-96 sm:left-auto sm:right-0">
-    <div className="relative h-full flex flex-col">
-      <button
-        onClick={onClose}
-        className="absolute top-4 right-4 z-10 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-colors"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-5 w-5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
+// Optimized Cart Overlay
+const CartOverlay = React.memo(({ onClose }) => {
+  return (
+    <motion.div
+      initial={{ x: '100%' }}
+      animate={{ x: 0 }}
+      exit={{ x: '100%' }}
+      transition={{ type: 'tween', ease: 'easeInOut' }}
+      className="fixed inset-0 w-full h-full bg-white shadow-2xl z-50 sm:w-96 sm:left-auto sm:right-0"
+    >
+      <div className="relative h-full flex flex-col">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 z-10 bg-gray-100 hover:bg-gray-200 text-gray-800 p-2 rounded-full transition-colors"
+          aria-label="Close cart"
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M6 18L18 6M6 6l12 12"
-          />
-        </svg>
-      </button>
-      <div className="flex-1 p-4 pt-16 overflow-y-auto">
-        <CartItems />
+          <FiX className="h-5 w-5" />
+        </button>
+        <div className="border-b border-gray-200 p-4">
+          <h3 className="text-xl font-semibold flex items-center">
+            <FiShoppingCart className="mr-2" />
+            Your Cart
+          </h3>
+        </div>
+        <div className="flex-1 p-4 overflow-y-auto">
+          <Suspense fallback={<div className="text-center py-8">Loading cart...</div>}>
+            <CartItems />
+          </Suspense>
+        </div>
+        <div className="border-t border-gray-200 p-4">
+          <button className="w-full bg-primary hover:bg-primary-dark text-white py-3 rounded-lg font-medium transition-colors">
+            Proceed to Checkout
+          </button>
+        </div>
       </div>
-    </div>
-  </div>
-));
+    </motion.div>
+  );
+});
 
-const ProductGrid = ({ title, products }) => {
+// Optimized Product Grid
+const ProductGrid = React.memo(({ title, products, showCategories = true }) => {
   const [visible, setVisible] = useState(false);
+  const [activeCategory, setActiveCategory] = useState('all');
   const handleClose = useCallback(() => setVisible(false), []);
 
-  // 5. Memoize product cards
-  const productCards = useMemo(
-    () =>
-      products?.map((product) => (
-        <ProductCard key={product.id} product={product} />
-      )),
-    [products]
-  );
+  const categories = useMemo(() => [
+    { name: "All", id: "all" },
+    { name: "Popular", id: "popular" },
+    { name: "New Arrivals", id: "new" },
+    { name: "Best Sellers", id: "bestsellers" },
+    { name: "Special Offers", id: "offers" }
+  ], []);
+
+  const filteredProducts = useMemo(() => {
+    if (!products) return [];
+    if (activeCategory === 'all') return products.slice(0, 12);
+    return products.slice(0, 8);
+  }, [products, activeCategory]);
 
   return (
-    <section className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 md:py-8">
-      {visible && <CartOverlay onClose={handleClose} />}
+    <section className="container mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <AnimatePresence>
+        {visible && <CartOverlay onClose={handleClose} />}
+      </AnimatePresence>
 
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-3 mb-4 sm:mb-6">
-        <h2 className="text-base sm:text-lg md:text-xl font-semibold">
-          {title}
-        </h2>
-        <a href="/shop">
-          <button className="w-full sm:w-auto bg-primary text-white px-3 sm:px-4 py-1 sm:py-2 rounded-md text-xs sm:text-sm font-medium hover:bg-primary-dark transition-colors">
-            View All
-          </button>
-        </a>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-8">
+        <div>
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+            {title}
+          </h2>
+          {showCategories && (
+            <div className="flex flex-wrap gap-2 mt-3">
+              {categories.map((category) => (
+                <button
+                  key={category.id}
+                  onClick={() => setActiveCategory(category.id)}
+                  className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                    activeCategory === category.id
+                      ? 'bg-primary text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  {category.name}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+        <Link
+          to="/shop"
+          className="inline-flex items-center text-primary hover:text-primary-dark font-medium group"
+          prefetch="intent"
+        >
+          View all
+          <FiArrowRight className="ml-1 group-hover:translate-x-1 transition-transform" />
+        </Link>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-2 sm:gap-4 md:gap-6">
-        {productCards}
-      </div>
+      {filteredProducts.length > 0 ? (
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+          {filteredProducts.map((product, index) => (
+            <Suspense key={index} fallback={<div className="h-64 bg-gray-100 rounded-lg animate-pulse" />}>
+              <ProductCard product={product} />
+            </Suspense>
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-12">
+          <p className="text-gray-500">No products found in this category</p>
+        </div>
+      )}
     </section>
   );
-};
+});
 
 const HomePage = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [products, setProducts] = useState(null);
+  const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
 
+  // Auto-advancing carousel with optimized timing
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % carouselSlides.length);
-    }, 5000);
-
-    return () => clearInterval(interval);
+    let interval;
+    const carouselElement = document.getElementById('carousel');
+    
+    const startInterval = () => {
+      interval = setInterval(() => {
+        setCurrentSlide(prev => {
+          const nextSlide = (prev + 1) % carouselSlides.length;
+          // Preload next image
+          preloadImage(carouselSlides[nextSlide].image);
+          return nextSlide;
+        });
+      }, 6000);
+    };
+    
+    const pauseInterval = () => clearInterval(interval);
+    
+    startInterval();
+    
+    if (carouselElement) {
+      carouselElement.addEventListener('mouseenter', pauseInterval);
+      carouselElement.addEventListener('mouseleave', startInterval);
+    }
+    
+    return () => {
+      clearInterval(interval);
+      if (carouselElement) {
+        carouselElement.removeEventListener('mouseenter', pauseInterval);
+        carouselElement.removeEventListener('mouseleave', startInterval);
+      }
+    };
   }, []);
 
+  // Optimized product fetching with caching
   useEffect(() => {
     let isMounted = true;
+    const controller = new AbortController();
 
-    (async () => {
-      setLoading(true);
+    const loadProducts = async () => {
       try {
-        const { data } = await fetchProducts();
+        // Check session storage for cached products
+        const cachedProducts = sessionStorage.getItem('cachedProducts');
+        if (cachedProducts) {
+          const data = JSON.parse(cachedProducts);
+          if (isMounted) {
+            setProducts(data);
+            dispatch(getProducts(data));
+            setLoading(false);
+          }
+          return;
+        }
+
+        // Dynamically import API function when needed
+        if (!fetchProducts) {
+          fetchProducts = (await import('../../config/api')).fetchProducts;
+        }
+
+        const { data } = await fetchProducts({ signal: controller.signal });
         if (isMounted) {
           setProducts(data);
           dispatch(getProducts(data));
+          // Cache the response
+          sessionStorage.setItem('cachedProducts', JSON.stringify(data));
+          setLoading(false);
         }
-      } catch (e) {
-        console.error("Error fetching products:", e);
-      } finally {
-        if (isMounted) setLoading(false);
+      } catch (error) {
+        if (isMounted && error.name !== 'AbortError') {
+          console.error("Error fetching products:", error);
+          setLoading(false);
+        }
       }
-    })();
+    };
+
+    loadProducts();
 
     return () => {
       isMounted = false;
+      controller.abort();
     };
   }, [dispatch]);
 
-  if (loading) {
+  if (loading || !products) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <div className="flex flex-col items-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mb-4"></div>
+          <p className="text-gray-600">Loading beautiful gifts...</p>
+        </div>
       </div>
     );
   }
@@ -209,12 +332,20 @@ const HomePage = () => {
   return (
     <div className="bg-gray-50 min-h-screen">
       <ScrollProgress />
-      <main className="pb-8">
-        <Carousel slides={carouselSlides} currentSlide={currentSlide} />
-        <ProductGrid title="Top Picks" products={products} />
+      
+      <main className="pb-12">
+        <div id="carousel">
+          <Carousel slides={carouselSlides} currentSlide={currentSlide} />
+        </div>
+        
+        <ProductGrid 
+          title="Our Curated Collection" 
+          products={products} 
+          showCategories={true}
+        />
       </main>
     </div>
   );
 };
 
-export default HomePage;
+export default React.memo(HomePage);
