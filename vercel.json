@@ -1,14 +1,6 @@
 {
-  "rewrites": [
-    {
-      "source": "/",
-      "destination": "/admin/dashboard",
-      "has": [
-        {
-          "type": "host",
-          "value": "admin.zangglobal.com"
-        }
-      ]
-    }
-  ]
-}
+    "rewrites": [
+      { "source": "/(.*)", "destination": "/" }
+    ]
+  }
+  
