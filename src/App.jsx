@@ -43,6 +43,8 @@ import AssistiveTechPage from "./pages/landingPage/AssistiveTech";
 import OrderView from "./pages/admin/orderView";
 import AdminBlogList from "./pages/admin/blogs";
 import BlogDetail from "./pages/landingPage/BlogView";
+import InitiativesPage from "./pages/landingPage/Initiatives";
+import InitiativeDetail from "./pages/landingPage/InitiativeDetails";
 
 function App() {
   return (
@@ -106,6 +108,9 @@ function App() {
               <Route path="/blogs" element={<Blogs />} />
               <Route path="/blogs/:id" element={<BlogDetail />} />
               <Route path="/training" element={<TrainingHub />} />
+              {/* <Route path="/initiatives" element={<InitiativesPage />}/> */}
+              <Route path="/initiatives/:id" element={<InitiativeDetail />}/>
+
               <Route path="/assistive-tech" element={<AssistiveTechPage />} />
             </Route>
 
