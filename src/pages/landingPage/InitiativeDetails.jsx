@@ -125,11 +125,10 @@ const InitiativeDetail = () => {
                 key={index}
                 className="rounded-lg overflow-hidden cursor-pointer relative group"
                 whileHover={{ scale: 1.03 }}
-                transition={{ duration: 0.3 }}
                 onClick={() => openImageModal(image, index)}
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.5 + index * 0.1 }}
+                transition={{ delay: 0.5 + index * 0.1,duration:0.3 }}
               >
                 <img
                   src={image}

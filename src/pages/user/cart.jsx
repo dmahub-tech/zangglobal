@@ -4,7 +4,6 @@ import CartItems from "../../components/user/cart/Cartitems";
 import RecentlyViewed from "../../components/user/cart/recentlyviewed";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Navbar from "../../components/user/navbar/navbar";
 import { Helmet } from "react-helmet";
 import { useSelector } from "react-redux";
 
@@ -51,8 +50,7 @@ const ShoppingCartPage = () => {
       <Helmet>
         <title>Shopping Cart - Zang Global</title>
       </Helmet>
-      <Navbar />
-      <div className="container mx-auto px-4 py-8 space-y-6 mt-16">
+      <div className="container mx-auto px-4 py-8 space-y-6">
         <div className="bg-white shadow-md rounded-lg">
           <div className="p-4 flex flex-col md:flex-row items-center justify-between">
             <h1 className="text-2xl font-bold text-gray-800">Shopping Cart</h1>

@@ -11,7 +11,6 @@ import emptyCart from '../../Images/empty_cart.webp';
 
 const CartItems = () => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
 
   const [voucher, setVoucher] = useState('');
   const [removingItem, setRemovingItem] = useState(null);
@@ -25,11 +24,9 @@ const CartItems = () => {
 
   const token = useSelector(state => state.auth.token);
   const user = useSelector(state => state.auth.user);
-  const cartId = useSelector(state => state.cart.items);
   const totalPrice = useSelector(state => state.cart.items.total);
 console.log("Carts:", totalPrice);
   const cartItems = useSelector((state) => state.cart.items.productsInCart) || [];
-  const cartStatus = useSelector(state => state.cart.status);
 
   // Fetch user only when token is present and user is not already fetched
   useEffect(() => {
@@ -45,7 +42,7 @@ console.log("Carts:", totalPrice);
       dispatch(fetchCart(user?.userId))
         .finally(() => setIsLoadingCart(false));
     }
-  }, [user?.userId, dispatch]);
+  }, [user?.userId, dispatch,updateCartQuantity]);
 
   const handleRemoveFromCart = useCallback(async (product) => {
     setRemovingItem(product.productId);
@@ -83,6 +80,8 @@ console.log("Carts:", totalPrice);
         productId,
         productQty: newQuantity,
       })).unwrap();
+      dispatch(fetchCart(user?.userId))
+    
     } catch (error) {
       toast.error(error?.message || "Failed to update quantity");
     } finally {

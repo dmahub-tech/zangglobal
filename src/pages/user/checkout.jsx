@@ -3,7 +3,6 @@ import { useNavigate } from "react-router";
 import { CheckCircle, CreditCard, Tag, Loader2, Truck, MapPin, Home, Package } from "lucide-react";
 import confetti from "canvas-confetti";
 import { Helmet } from "react-helmet";
-import Navbar from "../../components/user/navbar/navbar";
 import { useLocation } from "react-router";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchCart } from "../../redux/slice/cartSlice";
@@ -190,7 +189,6 @@ const Checkout = () => {
       <Helmet>
         <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
       </Helmet>
-      <Navbar />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Checkout Steps */}

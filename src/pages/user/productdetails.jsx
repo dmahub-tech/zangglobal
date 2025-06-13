@@ -18,7 +18,6 @@ import {
   FaShare,
   FaHeart
 } from 'react-icons/fa';
-import Navbar from '../../components/user/navbar/navbar';
 import { Helmet } from "react-helmet";
 import ReviewSection from './ReviewSection';
 import ReviewForm from './ReviewForm';
@@ -98,8 +97,6 @@ const ProductDetail = () => {
     setStockStatus({ status, color, stock });
   };
 
-
-
   const submitReview = async (data) => {
     try {
       const response = await api.post(`/reviews/new`, data, {
@@ -156,7 +153,6 @@ const ProductDetail = () => {
   if (!product) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Navbar />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-24">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Image Gallery Skeleton */}
@@ -199,17 +195,16 @@ const ProductDetail = () => {
         <title>{product.name} | Zang Global</title>
         <meta name="description" content={product.description} />
       </Helmet>
-      <Navbar />
       <ToastContainer position="bottom-right" />
 
       <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8 mt-16 md:mt-24">
           {/* Back Button */}
           <button 
             onClick={() => navigate(-1)}
-            className="flex items-center text-pink-600 hover:text-pink-800 mb-6 transition-colors"
+            className="flex items-center text-pink-600 hover:text-pink-800 mb-4 md:mb-6 transition-colors text-sm md:text-base"
           >
-            <FaChevronLeft className="mr-2" />
+            <FaChevronLeft className="mr-1 md:mr-2" />
             Back to Products
           </button>
 
@@ -218,41 +213,60 @@ const ProductDetail = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="bg-white rounded-2xl shadow-sm overflow-hidden"
+            className="bg-white rounded-xl md:rounded-2xl shadow-sm overflow-hidden"
           >
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-6">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-2 gap-4 md:gap-8 p-1 md:p-3">
               {/* Image Gallery */}
-              <div className="space-y-4">
-                <div className="relative aspect-square w-full bg-gray-100 rounded-xl overflow-hidden">
+              <div className="space-y-3 md:space-y-4">
+                <div className="relative aspect-square w-full bg-gray-100 rounded-lg md:rounded-xl overflow-hidden">
                   <img
                     src={product.img[selectedImage]}
                     alt={product.name}
-                    className="w-full h-full object-contain p-4"
+                    className="w-full h-full object-contain p-2 md:p-4"
+                    loading="lazy"
                   />
                   
-                  {/* Navigation Arrows */}
-                  <button
-                    onClick={handlePreviousImage}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-md"
-                  >
-                    <FaChevronLeft className="text-gray-700" />
-                  </button>
-                  <button
-                    onClick={handleNextImage}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-md"
-                  >
-                    <FaChevronRight className="text-gray-700" />
-                  </button>
+                  {/* Navigation Arrows - Mobile: Only show on hover */}
+                  <div className="md:hidden absolute inset-0 flex items-center justify-between px-2 opacity-0 hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={handlePreviousImage}
+                      className="bg-white/80 hover:bg-white p-1.5 rounded-full shadow-md"
+                    >
+                      <FaChevronLeft className="text-gray-700 text-sm" />
+                    </button>
+                    <button
+                      onClick={handleNextImage}
+                      className="bg-white/80 hover:bg-white p-1.5 rounded-full shadow-md"
+                    >
+                      <FaChevronRight className="text-gray-700 text-sm" />
+                    </button>
+                  </div>
+                  
+                  {/* Navigation Arrows - Desktop: Always visible */}
+                  <div className="hidden md:block">
+                    <button
+                      onClick={handlePreviousImage}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-md"
+                    >
+                      <FaChevronLeft className="text-gray-700" />
+                    </button>
+                    <button
+                      onClick={handleNextImage}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-2 rounded-full shadow-md"
+                    >
+                      <FaChevronRight className="text-gray-700" />
+                    </button>
+                  </div>
                   
                   {/* Badges */}
-                  <div className="absolute top-4 left-4 flex space-x-2">
+                  <div className="absolute top-2 md:top-4 left-2 md:left-4 flex space-x-1 md:space-x-2">
                     {product.isNew && (
-                      <span className="bg-pink-600 text-white text-xs font-bold px-2 py-1 rounded">
+                      <span className="bg-pink-600 text-white text-xs font-bold px-1.5 py-0.5 md:px-2 md:py-1 rounded">
                         NEW
                       </span>
                     )}
                     {product.discount && (
-                      <span className="bg-green-600 text-white text-xs font-bold px-2 py-1 rounded">
+                      <span className="bg-green-600 text-white text-xs font-bold px-1.5 py-0.5 md:px-2 md:py-1 rounded">
                         -{product.discount}%
                       </span>
                     )}
@@ -260,17 +274,18 @@ const ProductDetail = () => {
                 </div>
                 
                 {/* Thumbnail Gallery */}
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-4 gap-1 md:gap-2">
                   {product.img.map((img, index) => (
                     <button
                       key={index}
                       onClick={() => setSelectedImage(index)}
-                      className={`aspect-square bg-gray-100 rounded-lg overflow-hidden border-2 ${selectedImage === index ? 'border-pink-500' : 'border-transparent'}`}
+                      className={`aspect-square bg-gray-100 rounded md:rounded-lg overflow-hidden border ${selectedImage === index ? 'border-pink-500' : 'border-transparent'}`}
                     >
                       <img
                         src={img}
                         alt={`${product.name} thumbnail ${index + 1}`}
                         className="w-full h-full object-cover"
+                        loading="lazy"
                       />
                     </button>
                   ))}
@@ -278,89 +293,88 @@ const ProductDetail = () => {
               </div>
 
               {/* Product Info */}
-              <div className="space-y-6">
+              <div className="space-y-4 md:space-y-6">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+                    <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900">
                       {product.name}
                     </h1>
-                    <div className="flex items-center mt-2 space-x-2">
-                      <div className="flex items-center bg-yellow-50 px-2 py-1 rounded">
-                        <FaStar className="text-yellow-500 mr-1" />
+                    <div className="flex items-center mt-1 md:mt-2 space-x-1 md:space-x-2">
+                      <div className="flex items-center bg-yellow-50 px-1.5 py-0.5 md:px-2 md:py-1 rounded text-sm md:text-base">
+                        <FaStar className="text-yellow-500 mr-0.5 md:mr-1" />
                         <span className="font-medium text-yellow-700">
                           {product.rating || '4.5'}
                         </span>
-                        <span className="text-gray-500 text-sm ml-1">
+                        <span className="text-gray-500 text-xs md:text-sm ml-0.5 md:ml-1">
                           ({reviews.length} reviews)
                         </span>
                       </div>
                     </div>
                   </div>
                   
-                  <div className="flex space-x-3">
+                  <div className="flex space-x-2 md:space-x-3">
                     <button 
                       onClick={toggleWishlist}
-                      className={`p-2 rounded-full ${isWishlisted ? 'text-pink-600' : 'text-gray-400 hover:text-pink-600'}`}
+                      className={`p-1.5 md:p-2 rounded-full ${isWishlisted ? 'text-pink-600' : 'text-gray-400 hover:text-pink-600'}`}
                     >
-                      <FaHeart className={isWishlisted ? 'fill-current' : ''} />
+                      <FaHeart className={isWishlisted ? 'fill-current' : ''} size={18} />
                     </button>
                     <button 
                       onClick={shareProduct}
-                      className="p-2 rounded-full text-gray-400 hover:text-pink-600"
+                      className="p-1.5 md:p-2 rounded-full text-gray-400 hover:text-pink-600"
                     >
-                      <FaShare />
+                      <FaShare size={18} />
                     </button>
                   </div>
                 </div>
 
                 {/* Price */}
-                <div className="space-y-1">
-                  <div className="flex items-center space-x-3">
-                    <span className="text-3xl font-bold text-gray-900">
+                <div className="space-y-0.5 md:space-y-1">
+                  <div className="flex items-center space-x-2 md:space-x-3">
+                    <span className="text-2xl md:text-3xl font-bold text-gray-900">
                       ₦{product.price.toLocaleString()}
                     </span>
                     {product.originalPrice && (
-                      <span className="text-lg text-gray-500 line-through">
+                      <span className="text-base md:text-lg text-gray-500 line-through">
                         ₦{product.originalPrice.toLocaleString()}
                       </span>
                     )}
                   </div>
                   {product.discount && (
-                    <span className="text-green-600 font-medium">
+                    <span className="text-green-600 font-medium text-sm md:text-base">
                       Save ₦{(product.originalPrice - product.price).toLocaleString()} ({product.discount}%)
                     </span>
                   )}
                 </div>
 
                 {/* Description */}
-                <div className="prose max-w-none text-gray-600">
+                <div className="prose max-w-none text-gray-600 text-sm md:text-base">
                   <p>{product.description}</p>
                 </div>
 
                 {/* Stock Status */}
-                <div className="flex flex-wrap gap-2">
-                  <div className={`px-3 py-2 rounded-lg flex items-center text-sm font-medium ${stockStatus?.color}`}>
-                    {stockStatus?.status === "In Stock" && <FaBox className="mr-2" />}
-                    {stockStatus?.status === "Low Stock" && <FaExclamationCircle className="mr-2" />}
-                    {stockStatus?.status === "Very Low Stock" && <FaWarehouse className="mr-2" />}
-                    {stockStatus?.status === "Out of Stock" && <FaShippingFast className="mr-2" />}
+                <div className="flex flex-wrap gap-1 md:gap-2">
+                  <div className={`px-2 py-1 md:px-3 md:py-2 rounded-lg flex items-center text-xs md:text-sm font-medium ${stockStatus?.color}`}>
+                    {stockStatus?.status === "In Stock" && <FaBox className="mr-1 md:mr-2" size={12} />}
+                    {stockStatus?.status === "Low Stock" && <FaExclamationCircle className="mr-1 md:mr-2" size={12} />}
+                    {stockStatus?.status === "Very Low Stock" && <FaWarehouse className="mr-1 md:mr-2" size={12} />}
+                    {stockStatus?.status === "Out of Stock" && <FaShippingFast className="mr-1 md:mr-2" size={12} />}
                     {stockStatus?.status} ({stockStatus?.stock} available)
                   </div>
-                  <div className="px-3 py-2 rounded-lg bg-gray-100 text-gray-800 text-sm font-medium flex items-center">
-                    <FaTag className="mr-2" />
+                  <div className="px-2 py-1 md:px-3 md:py-2 rounded-lg bg-gray-100 text-gray-800 text-xs md:text-sm font-medium flex items-center">
+                    <FaTag className="mr-1 md:mr-2" size={12} />
                     {product.category}
                   </div>
                 </div>
 
-            
                 {/* Action Buttons */}
-                <div className="grid grid-cols-2 gap-4 pt-6">
+                <div className="grid grid-cols-2 gap-3 md:gap-4 pt-4 md:pt-6">
                   <AddToCart 
                     product={product} 
                     className="w-full"
                   />
                   <button
-                    className="w-full py-3 px-6 bg-pink-600 hover:bg-pink-700 text-white font-medium rounded-lg transition-colors"
+                    className="w-full py-2 md:py-3 px-4 md:px-6 bg-pink-600 hover:bg-pink-700 text-white font-medium rounded-lg transition-colors text-sm md:text-base"
                   >
                     Buy Now
                   </button>
@@ -370,23 +384,23 @@ const ProductDetail = () => {
           </motion.div>
 
           {/* Product Details Tabs */}
-          <div className="mt-8 bg-white rounded-2xl shadow-sm overflow-hidden">
+          <div className="mt-6 md:mt-8 bg-white rounded-xl md:rounded-2xl shadow-sm overflow-hidden">
             <div className="border-b border-gray-200">
-              <nav className="flex -mb-px">
-                <button className="py-4 px-6 border-b-2 border-pink-500 text-pink-600 font-medium">
+              <nav className="flex -mb-px overflow-x-auto">
+                <button className="py-3 md:py-4 px-4 md:px-6 border-b-2 border-pink-500 text-pink-600 font-medium text-sm md:text-base whitespace-nowrap">
                   Description
                 </button>
-                <button className="py-4 px-6 text-gray-500 hover:text-gray-700 font-medium">
+                <button className="py-3 md:py-4 px-4 md:px-6 text-gray-500 hover:text-gray-700 font-medium text-sm md:text-base whitespace-nowrap">
                   Specifications
                 </button>
-                <button className="py-4 px-6 text-gray-500 hover:text-gray-700 font-medium">
+                <button className="py-3 md:py-4 px-4 md:px-6 text-gray-500 hover:text-gray-700 font-medium text-sm md:text-base whitespace-nowrap">
                   Shipping & Returns
                 </button>
               </nav>
             </div>
-            <div className="p-6">
-              <div className="prose max-w-none">
-                <h3 className="text-lg font-medium text-gray-900">Product Details</h3>
+            <div className="p-4 md:p-6">
+              <div className="prose max-w-none text-sm md:text-base">
+                <h3 className="text-base md:text-lg font-medium text-gray-900">Product Details</h3>
                 <p>{product.description}</p>
                 {/* Add more detailed description content here */}
               </div>
@@ -394,7 +408,7 @@ const ProductDetail = () => {
           </div>
 
           {/* Reviews Section */}
-          <div className="mt-8 bg-white rounded-2xl shadow-sm overflow-hidden">
+          <div className="mt-6 md:mt-8 bg-white rounded-xl md:rounded-2xl shadow-sm overflow-hidden">
             <ReviewSection
               reviews={reviews}
               rating={product.rating}
@@ -405,7 +419,7 @@ const ProductDetail = () => {
           {/* Review Form Modal */}
           {showReviewForm && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-              <div className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+              <div className="bg-white rounded-xl md:rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
                 <ReviewForm
                   productId={productId}
                   onClose={() => setShowReviewForm(false)}
@@ -418,9 +432,9 @@ const ProductDetail = () => {
 
           {/* Recently Viewed */}
           {recentlyViewed.length > 0 && (
-            <div className="mt-12">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Recently Viewed</h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="mt-8 md:mt-12">
+              <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-4 md:mb-6">Recently Viewed</h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
                 {recentlyViewed.map((item) => (
                   <Link 
                     key={item.productId} 
@@ -432,15 +446,16 @@ const ProductDetail = () => {
                         <img
                           src={item.img[0] ? item.img[0] : item.img}
                           alt={item.name}
-                          className="w-full h-full object-contain p-4"
+                          className="w-full h-full object-contain p-2 md:p-4"
+                          loading="lazy"
                         />
                         <div className="absolute inset-0 bg-black/5 group-hover:opacity-100 opacity-0 transition-opacity" />
                       </div>
-                      <div className="p-4">
-                        <h3 className="font-medium text-gray-900 line-clamp-2 mb-1">
+                      <div className="p-2 md:p-4">
+                        <h3 className="font-medium text-gray-900 line-clamp-2 mb-1 text-sm md:text-base">
                           {item.name}
                         </h3>
-                        <p className="text-lg font-bold text-pink-600">
+                        <p className="text-base md:text-lg font-bold text-pink-600">
                           ₦{item.price.toLocaleString()}
                         </p>
                       </div>
