@@ -37,7 +37,7 @@ const Login = () => {
   return (
     <>
       {/* <SEOComponent /> */}
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 mt-16">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
         
         <motion.div 
           className="w-full max-w-md bg-white shadow-2xl rounded-2xl overflow-hidden"
