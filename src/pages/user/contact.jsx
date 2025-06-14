@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaPaperPlane } from "react-icons/fa";
 import { motion } from "framer-motion";
-import Navbar from "../../components/user/navbar/navbar";
 import { Helmet } from "react-helmet";
 import { useLocation } from "react-router-dom";
 
@@ -55,7 +54,6 @@ const pathLocation = useLocation()
     <>
     <div className={`${pathLocation.pathname ==="/"?"hidden":""}`}>
 
-    <Navbar className='z-0 mb-auto' />
     </div>
     <div id="contact" className="bg-mutedSecondary  to-blue-50 min-h-screen mt-16">
       

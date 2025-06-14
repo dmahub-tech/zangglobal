@@ -44,47 +44,7 @@ const Product = () => {
   }, [ refresh]); // Refresh dependency added
 
   const productData = products
-  console.log(products, "from products")
-
   
-
-  const handleImageUpload = async () => {
-    if (!selectedFile) {
-      setUploadStatus('Please select an image first');
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append('image', selectedFile);
-
-    try {
-      setIsUploading(true);
-      setUploadStatus('Uploading...');
-
-      const response = await fetch('https://api.merabestie.com/image/image-upload', {
-        method: 'POST',
-        body: formData,
-      });
-      const data = await response.json();
-      
-      if (data.success) {
-        setEditValues(prev => ({
-          ...prev,
-          img: [...prev.img, data.imageUrl]
-        }));
-        setUploadStatus('Upload successful');
-        setSelectedFile(null);
-        const fileInput = document.getElementById('imageInput');
-        if (fileInput) fileInput.value = '';
-      } else {
-        setUploadStatus('Upload failed: ' + data.message);
-      }
-    } catch (error) {
-      setUploadStatus('Upload failed: ' + error.message);
-    } finally {
-      setIsUploading(false);
-    }
-  };
 
   const handleDelete = async (product) => {
     console.log("Deleting...", product.name);

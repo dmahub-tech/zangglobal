@@ -163,8 +163,8 @@ const ProductGrid = React.memo(({ title, products, showCategories = true }) => {
 
   const categories = useMemo(() => [
     { name: "All", id: "all" },
-    { name: "Popular", id: "popular" },
-    { name: "New Arrivals", id: "new" },
+    { name: "Charger", id: "charger" },
+    { name: "USB cables", id: "cable" },
     { name: "Best Sellers", id: "bestsellers" },
     { name: "Special Offers", id: "offers" }
   ], []);
@@ -324,7 +324,7 @@ const HomePage = () => {
       <div className="min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mb-4"></div>
-          <p className="text-gray-600">Loading beautiful gifts...</p>
+          <p className="text-gray-600">Loading Product...</p>
         </div>
       </div>
     );
