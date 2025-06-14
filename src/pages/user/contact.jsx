@@ -55,7 +55,7 @@ const pathLocation = useLocation()
     <div className={`${pathLocation.pathname ==="/"?"hidden":""}`}>
 
     </div>
-    <div id="contact" className="bg-mutedSecondary  to-blue-50 min-h-screen mt-16">
+    <div id="contact" className="bg-mutedSecondary  to-blue-50 min-h-screen">
       
       <div className="container mx-auto px-4 py-16">
         {showSuccess && (
