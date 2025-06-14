@@ -247,7 +247,7 @@ const Footer = () => {
       {/* Copyright */}
 
       <div className="mt-10 text-center text-sm border-t border-mutedPrimary pt-5">
-        &copy; {new Date().getFullYear()} Your Company Name. All rights
+        &copy; {new Date().getFullYear()} Zang Global. All rights
         reserved.
       </div>
     </footer>
