@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { FiArrowRight, FiShoppingCart, FiX } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { debounce } from 'lodash-es';
+import { getProducts } from '../../redux/slice/productSlice';
 
 // Lazy load heavy components
 const CartItems = lazy(() => import('../../components/user/cart/Cartitems'));
