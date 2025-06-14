@@ -30,7 +30,7 @@ const Login = () => {
     } catch (err) {
       console.error("Login failed:", err);
       setLoading(false)
-      setError(err.message)
+      setError(err)
     }
   };
 
