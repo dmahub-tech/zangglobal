@@ -191,12 +191,12 @@ const Header = () => {
                         >
                           My Orders
                         </Link>
-                        <Link
+                        {/* <Link
                           to="/settings"
                           className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition"
                         >
                           Profile Settings
-                        </Link>
+                        </Link> */}
                         <button
                           onClick={handleLogout}
                           className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition"
