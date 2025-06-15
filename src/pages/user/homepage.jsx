@@ -3,7 +3,7 @@ import { useDispatch,useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { FiArrowRight, FiShoppingCart, FiX } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
-import { debounce } from 'lodash-es';
+import { debounce, set } from 'lodash-es';
 import { getProducts } from '../../redux/slice/productSlice';
 
 // Lazy load heavy components
@@ -165,7 +165,7 @@ const ProductGrid = React.memo(({ title, products, showCategories = true }) => {
     { name: "All", id: "all" },
     { name: "Charger", id: "charger" },
     { name: "USB cables", id: "cable" },
-    { name: "Best Sellers", id: "bestsellers" },
+    { name: "Power Banks", id: "powerbank" },
     { name: "Special Offers", id: "offers" }
   ], []);
 
@@ -214,7 +214,7 @@ const ProductGrid = React.memo(({ title, products, showCategories = true }) => {
         </Link>
       </div>
 
-      {filteredProducts.length > 0 ? (
+      {filteredProducts.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
           {filteredProducts.map((product, index) => (
             <Suspense key={index} fallback={<div className="h-64 bg-gray-100 rounded-lg animate-pulse" />}>
@@ -222,7 +222,8 @@ const ProductGrid = React.memo(({ title, products, showCategories = true }) => {
             </Suspense>
           ))}
         </div>
-      ) : (
+      ) }
+      { !products && !filteredProducts &&(
         <div className="text-center py-12">
           <p className="text-gray-500">No products found in this category</p>
         </div>
@@ -234,11 +235,23 @@ const ProductGrid = React.memo(({ title, products, showCategories = true }) => {
 const HomePage = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const dispatch = useDispatch();
-  const { products, loading, error } = useSelector((state) => (state.product || {}));
+  const { products, error } = useSelector((state) => (state.product || {}));
+  const [loading,setLoading] = useState(true);
 
   // Fetch products on first mount
   useEffect(() => {
-    dispatch(getProducts());
+    const fetchProducts = async () => { 
+      setLoading(true);
+      try {
+       dispatch(getProducts());
+        setLoading(false);
+    }
+    catch(error){
+        console.error("Error fetching products:", error);
+        setLoading(false);
+      }
+    }
+    fetchProducts();
   }, [dispatch]);
 
   // Auto-advancing carousel with optimized timing
@@ -275,7 +288,7 @@ const HomePage = () => {
     };
   }, []);
 
-  if (loading && !products) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center">
@@ -286,22 +299,6 @@ const HomePage = () => {
     );
   }
 
-  if (!products) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h3 className="text-lg font-medium text-red-600">Error loading products</h3>
-          <p className="mt-2 text-gray-600">{error}</p>
-          <button
-            onClick={() => dispatch(getProducts())}
-            className="mt-4 px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark"
-          >
-            Retry
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -311,6 +308,12 @@ const HomePage = () => {
         <div id="carousel">
           <Carousel slides={carouselSlides} currentSlide={currentSlide} />
         </div>
+        {
+          loading &&(<div>
+
+            hello world
+          </div>)
+        }
         
         <ProductGrid 
           title="Our Curated Collection" 
