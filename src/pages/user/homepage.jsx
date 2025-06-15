@@ -235,7 +235,6 @@ const HomePage = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const dispatch = useDispatch();
   const { products, loading, error } = useSelector((state) => (state.product || {}));
-  console.log("Products:", products);
 
   // Fetch products on first mount
   useEffect(() => {
@@ -287,7 +286,7 @@ const HomePage = () => {
     );
   }
 
-  if (error) {
+  if (!products) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
