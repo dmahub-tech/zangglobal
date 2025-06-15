@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback, lazy, Suspense } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch,useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { FiArrowRight, FiShoppingCart, FiX } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -233,9 +233,14 @@ const ProductGrid = React.memo(({ title, products, showCategories = true }) => {
 
 const HomePage = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [products, setProducts] = useState(null);
-  const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
+  const { products, loading, error } = useSelector((state) => (state.product || {}));
+  console.log("Products:", products);
+
+  // Fetch products on first mount
+  useEffect(() => {
+    dispatch(getProducts());
+  }, [dispatch]);
 
   // Auto-advancing carousel with optimized timing
   useEffect(() => {
@@ -271,60 +276,29 @@ const HomePage = () => {
     };
   }, []);
 
-  // Optimized product fetching with caching
-  useEffect(() => {
-    let isMounted = true;
-    const controller = new AbortController();
-
-    const loadProducts = async () => {
-      try {
-        // Check session storage for cached products
-        const cachedProducts = sessionStorage.getItem('cachedProducts');
-        if (cachedProducts) {
-          const data = JSON.parse(cachedProducts);
-          if (isMounted) {
-            setProducts(data);
-            dispatch(getProducts(data));
-            setLoading(false);
-          }
-          return;
-        }
-
-        // Dynamically import API function when needed
-        if (!fetchProducts) {
-          fetchProducts = (await import('../../config/api')).fetchProducts;
-        }
-
-        const { data } = await fetchProducts({ signal: controller.signal });
-        if (isMounted) {
-          setProducts(data);
-          dispatch(getProducts(data));
-          // Cache the response
-          sessionStorage.setItem('cachedProducts', JSON.stringify(data));
-          setLoading(false);
-        }
-      } catch (error) {
-        if (isMounted && error.name !== 'AbortError') {
-          console.error("Error fetching products:", error);
-          setLoading(false);
-        }
-      }
-    };
-
-    loadProducts();
-
-    return () => {
-      isMounted = false;
-      controller.abort();
-    };
-  }, [dispatch]);
-
-  if (loading || !products) {
+  if (loading && !products) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mb-4"></div>
-          <p className="text-gray-600">Loading Product...</p>
+          <p className="text-gray-600">Loading Products...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h3 className="text-lg font-medium text-red-600">Error loading products</h3>
+          <p className="mt-2 text-gray-600">{error}</p>
+          <button
+            onClick={() => dispatch(getProducts())}
+            className="mt-4 px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark"
+          >
+            Retry
+          </button>
         </div>
       </div>
     );
@@ -350,3 +324,4 @@ const HomePage = () => {
 };
 
 export default React.memo(HomePage);
+

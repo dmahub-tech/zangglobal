@@ -44,9 +44,9 @@ export default function SignUp() {
 
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 to-pink-100 flex items-center justify-center p-4">
+      <div className=" flex items-center justify-center ">
         <motion.div
-          className="w-full max-w-md bg-white shadow-2xl rounded-lg overflow-hidden mt-auto"
+          className="w-full max-w-md  shadow-2xl h-fit rounded-lg overflow-hidden mt-auto"
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{
