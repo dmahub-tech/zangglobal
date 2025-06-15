@@ -145,7 +145,7 @@ export const AdminAuthProvider = ({ children }) => {
       setAuthData(token, data);
       localStorage.setItem("adminId", data._id); // Store user ID in localStorage
       localStorage.setItem("admin", JSON.stringify(data)); // Store admin data in localStorage
-      navigate("/admin/dashboard");
+      navigate("/admin/");
     } catch (err ) {
       setError(
         err.response?.data?.message ||
@@ -170,7 +170,7 @@ export const AdminAuthProvider = ({ children }) => {
 
       const response = await api.post("/admin/register", formData);
       setAuthData(response.data.token, response.data.user);
-      navigate("/admin/dashboard");
+      navigate("/admin/");
     } catch (err) {
       setError(
         err.response?.data?.message || "Registration failed. Please try again."

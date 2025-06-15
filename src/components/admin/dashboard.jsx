@@ -13,6 +13,8 @@ import { FaMoneyBill, FaRupeeSign } from "react-icons/fa";
 import { useSelector, useDispatch } from "react-redux";
 import { getProducts } from "../../redux/slice/productSlice";
 import { useAdminAuth } from "../../context/Admin";
+import { toast } from "react-toastify";
+import api from "../../config/api";
 
 const Dashboard = () => {
   const [orders, setOrders] = useState([]);
@@ -43,7 +45,7 @@ const Dashboard = () => {
         console.error('Error fetching orders:', error);
         toast.error('Failed to load orders');
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
 

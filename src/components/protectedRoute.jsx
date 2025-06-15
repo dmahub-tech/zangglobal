@@ -1,15 +1,16 @@
+import React from "react";
+import { Navigate } from "react-router-dom";
+import { useAdminAuth } from "../context/Admin";
 
-import React, { useAdminAuth } from "../context/Admin";
-import { Navigate, Outlet } from "react-router-dom";
-
-const ProtectedRoute = () => {
+const ProtectedRoute = ({ children }) => {
   const { isAdmin, loading } = useAdminAuth();
+  console.log("ProtectedRoute isAdmin:", isAdmin, "loading:", loading);
 
   if (loading) {
-    return <div>Loading...</div>; // Or your custom loading component
+    return <div>Loading...</div>;
   }
 
-  return isAdmin ? <Outlet /> : <Navigate to="/admin/login" replace />;
+  return isAdmin ? children : <Navigate to="/admin/login" replace />;
 };
 
 export default ProtectedRoute;

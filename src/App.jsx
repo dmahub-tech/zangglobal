@@ -43,7 +43,6 @@ import AssistiveTechPage from "./pages/landingPage/AssistiveTech";
 import OrderView from "./pages/admin/orderView";
 import AdminBlogList from "./pages/admin/blogs";
 import BlogDetail from "./pages/landingPage/BlogView";
-import InitiativesPage from "./pages/landingPage/Initiatives";
 import InitiativeDetail from "./pages/landingPage/InitiativeDetails";
 
 function App() {
@@ -61,7 +60,7 @@ function App() {
                 </AdminAuthProvider>
               }
             >
-              <Route path="dashboard" element={<DashboardPage />} />
+              <Route path="" element={<DashboardPage />} />
               <Route path="products" element={<Product />} />
               <Route path="orders" element={<Orders />} />
               <Route path="customers" element={<Customers />} />
