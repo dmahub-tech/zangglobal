@@ -1,41 +1,48 @@
-import React, { useState, useEffect, useMemo, useCallback, lazy, Suspense } from 'react';
-import { useDispatch,useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
-import { FiArrowRight, FiShoppingCart, FiX } from 'react-icons/fi';
-import { motion, AnimatePresence } from 'framer-motion';
-import { debounce } from 'lodash-es';
-import { getProducts } from '../../redux/slice/productSlice';
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+  lazy,
+  Suspense,
+} from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Link } from "react-router-dom";
+import { FiArrowRight, FiShoppingCart, FiX } from "react-icons/fi";
+import { motion, AnimatePresence } from "framer-motion";
+import { debounce } from "lodash-es";
+import { fetchProducts } from "../../config/api";
 
 // Lazy load heavy components
-const CartItems = lazy(() => import('../../components/user/cart/Cartitems'));
-const ProductCard = lazy(() => import('../../components/user/ProductCard'));
-
-// API functions should be imported dynamically when needed
-let fetchProducts;
+const CartItems = lazy(() => import("../../components/user/cart/Cartitems"));
+const ProductCard = lazy(() => import("../../components/user/ProductCard"));
 
 // Optimized carousel slides with preloaded and sized images
 const carouselSlides = [
   {
     title: "50% OFF Summer Sale",
     description: "Limited time offers on curated gift selections",
-    image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=1200&h=600&auto=format&fit=crop",
+    image:
+      "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=1200&h=600&auto=format&fit=crop",
     cta: "Shop Now",
-    ctaLink: "/summer-sale"
+    ctaLink: "/summer-sale",
   },
   {
     title: "New Arrivals",
     description: "Discover our latest collection of thoughtful gifts",
-    image: "https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=1200&h=600&auto=format&fit=crop",
+    image:
+      "https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=1200&h=600&auto=format&fit=crop",
     cta: "Explore New Items",
-    ctaLink: "/new-arrivals"
+    ctaLink: "/new-arrivals",
   },
   {
     title: "Premium Collection",
     description: "Elevate your gifting with our luxury selections",
-    image: "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1200&h=600&auto=format&fit=crop",
+    image:
+      "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1200&h=600&auto=format&fit=crop",
     cta: "View Collection",
-    ctaLink: "/premium"
-  }
+    ctaLink: "/premium",
+  },
 ];
 
 // Preload first carousel image
@@ -97,15 +104,16 @@ const ScrollProgress = React.memo(() => {
   useEffect(() => {
     const updateScrollProgress = () => {
       const currentScroll = window.scrollY;
-      const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const scrollHeight =
+        document.documentElement.scrollHeight - window.innerHeight;
       if (scrollHeight > 0) {
         setScrollProgress(Math.min((currentScroll / scrollHeight) * 100, 100));
       }
     };
 
     const debouncedScroll = debounce(updateScrollProgress, 16);
-    window.addEventListener('scroll', debouncedScroll, { passive: true });
-    return () => window.removeEventListener('scroll', debouncedScroll);
+    window.addEventListener("scroll", debouncedScroll, { passive: true });
+    return () => window.removeEventListener("scroll", debouncedScroll);
   }, []);
 
   return (
@@ -120,10 +128,10 @@ const ScrollProgress = React.memo(() => {
 const CartOverlay = React.memo(({ onClose }) => {
   return (
     <motion.div
-      initial={{ x: '100%' }}
+      initial={{ x: "100%" }}
       animate={{ x: 0 }}
-      exit={{ x: '100%' }}
-      transition={{ type: 'tween', ease: 'easeInOut' }}
+      exit={{ x: "100%" }}
+      transition={{ type: "tween", ease: "easeInOut" }}
       className="fixed inset-0 w-full h-full bg-white shadow-2xl z-50 sm:w-96 sm:left-auto sm:right-0"
     >
       <div className="relative h-full flex flex-col">
@@ -141,7 +149,9 @@ const CartOverlay = React.memo(({ onClose }) => {
           </h3>
         </div>
         <div className="flex-1 p-4 overflow-y-auto">
-          <Suspense fallback={<div className="text-center py-8">Loading cart...</div>}>
+          <Suspense
+            fallback={<div className="text-center py-8">Loading cart...</div>}
+          >
             <CartItems />
           </Suspense>
         </div>
@@ -158,20 +168,23 @@ const CartOverlay = React.memo(({ onClose }) => {
 // Optimized Product Grid
 const ProductGrid = React.memo(({ title, products, showCategories = true }) => {
   const [visible, setVisible] = useState(false);
-  const [activeCategory, setActiveCategory] = useState('all');
+  const [activeCategory, setActiveCategory] = useState("all");
   const handleClose = useCallback(() => setVisible(false), []);
 
-  const categories = useMemo(() => [
-    { name: "All", id: "all" },
-    { name: "Charger", id: "charger" },
-    { name: "USB cables", id: "cable" },
-    { name: "Best Sellers", id: "bestsellers" },
-    { name: "Special Offers", id: "offers" }
-  ], []);
+  const categories = useMemo(
+    () => [
+      { name: "All", id: "all" },
+      { name: "Charger", id: "charger" },
+      { name: "USB cables", id: "cable" },
+      { name: "Best Sellers", id: "bestsellers" },
+      { name: "Special Offers", id: "offers" },
+    ],
+    []
+  );
 
   const filteredProducts = useMemo(() => {
     if (!products) return [];
-    if (activeCategory === 'all') return products.slice(0, 12);
+    if (activeCategory === "all") return products.slice(0, 12);
     return products.slice(0, 8);
   }, [products, activeCategory]);
 
@@ -194,8 +207,8 @@ const ProductGrid = React.memo(({ title, products, showCategories = true }) => {
                   onClick={() => setActiveCategory(category.id)}
                   className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
                     activeCategory === category.id
-                      ? 'bg-primary text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      ? "bg-primary text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                   }`}
                 >
                   {category.name}
@@ -217,7 +230,12 @@ const ProductGrid = React.memo(({ title, products, showCategories = true }) => {
       {filteredProducts.length > 0 ? (
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
           {filteredProducts.map((product, index) => (
-            <Suspense key={index} fallback={<div className="h-64 bg-gray-100 rounded-lg animate-pulse" />}>
+            <Suspense
+              key={index}
+              fallback={
+                <div className="h-64 bg-gray-100 rounded-lg animate-pulse" />
+              }
+            >
               <ProductCard product={product} />
             </Suspense>
           ))}
@@ -233,45 +251,53 @@ const ProductGrid = React.memo(({ title, products, showCategories = true }) => {
 
 const HomePage = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [products, setProducts] = useState();
+  const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
-  const { products, loading, error } = useSelector((state) => (state.product || {}));
-  console.log("Products:", products);
-  console.log(loading)
-  // Fetch products on first mount
-  useEffect(() => {
-    dispatch(getProducts());
-  }, [dispatch]);
 
-  // Auto-advancing carousel with optimized timing
+  useEffect(() => {
+    const fetchProductsData = async () => {
+      setLoading(true)
+      try {
+        const productData = await fetchProducts();
+        setProducts(productData.data);
+        setLoading(false)
+      } catch (error) {
+        console.log(error);
+        setLoading(false)
+      }
+    };
+    fetchProductsData();
+  }, []);
+
   useEffect(() => {
     let interval;
-    const carouselElement = document.getElementById('carousel');
-    
+    const carouselElement = document.getElementById("carousel");
+
     const startInterval = () => {
       interval = setInterval(() => {
-        setCurrentSlide(prev => {
+        setCurrentSlide((prev) => {
           const nextSlide = (prev + 1) % carouselSlides.length;
-          // Preload next image
           preloadImage(carouselSlides[nextSlide].image);
           return nextSlide;
         });
       }, 6000);
     };
-    
+
     const pauseInterval = () => clearInterval(interval);
-    
+
     startInterval();
-    
+
     if (carouselElement) {
-      carouselElement.addEventListener('mouseenter', pauseInterval);
-      carouselElement.addEventListener('mouseleave', startInterval);
+      carouselElement.addEventListener("mouseenter", pauseInterval);
+      carouselElement.addEventListener("mouseleave", startInterval);
     }
-    
+
     return () => {
       clearInterval(interval);
       if (carouselElement) {
-        carouselElement.removeEventListener('mouseenter', pauseInterval);
-        carouselElement.removeEventListener('mouseleave', startInterval);
+        carouselElement.removeEventListener("mouseenter", pauseInterval);
+        carouselElement.removeEventListener("mouseleave", startInterval);
       }
     };
   }, []);
@@ -287,46 +313,25 @@ const HomePage = () => {
     );
   }
 
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h3 className="text-lg font-medium text-red-600">Error loading products</h3>
-          <p className="mt-2 text-gray-600">{error}</p>
-          <button
-            onClick={() => dispatch(getProducts())}
-            className="mt-4 px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark"
-          >
-            Retry
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="bg-gray-50 min-h-screen">
       <ScrollProgress />
-      
+
       <main className="pb-12 ">
         <div id="carousel">
           <Carousel slides={carouselSlides} currentSlide={currentSlide} />
         </div>
 
-        {
-          products &&(
-
-            <ProductGrid 
-              title="Our Curated Collection" 
-              products={products} 
-              showCategories={true}
-            />
-          )
-        }
+        {products && (
+          <ProductGrid
+            title="Our Curated Collection"
+            products={products}
+            showCategories={true}
+          />
+        )}
       </main>
     </div>
   );
 };
 
 export default React.memo(HomePage);
-
