@@ -1,6 +1,18 @@
 {
-    "rewrites": [
-      { "source": "/(.*)", "destination": "/" }
-    ]
-  }
-  
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "https://zangglobal.com/admin/login",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "admin.zangglobal.com"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/" }
+  ]
+}

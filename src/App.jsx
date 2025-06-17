@@ -44,6 +44,7 @@ import OrderView from "./pages/admin/orderView";
 import AdminBlogList from "./pages/admin/blogs";
 import BlogDetail from "./pages/landingPage/BlogView";
 import InitiativeDetail from "./pages/landingPage/InitiativeDetails";
+import SettingsPage from "./pages/admin/settings";
 
 function App() {
   return (
@@ -67,6 +68,8 @@ function App() {
               <Route path="reviews" element={<Reviews />} />
               <Route path="blogs" element={<AdminBlogList />} />
               <Route path="calendar" element={<CalendarPage />} />
+              <Route path="settings" element={<SettingsPage />} />
+
               <Route path="orders/:orderId" element={<OrderView />} />
 
               <Route path="SEO" element={<SEO />} />
