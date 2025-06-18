@@ -12,6 +12,7 @@ import { FiArrowRight, FiShoppingCart, FiX } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
 import { debounce } from "lodash-es";
 import { fetchProducts } from "../../config/api";
+import ProductCardSkeleton from "../../components/user/ProductCardSkeleton";
 
 // Lazy load heavy components
 const CartItems = lazy(() => import("../../components/user/cart/Cartitems"));
@@ -165,8 +166,7 @@ const CartOverlay = React.memo(({ onClose }) => {
   );
 });
 
-// Optimized Product Grid
-const ProductGrid = React.memo(({ title, products, showCategories = true }) => {
+const ProductGrid = React.memo(({ title, products, showCategories = true, isLoading }) => {
   const [visible, setVisible] = useState(false);
   const [activeCategory, setActiveCategory] = useState("all");
   const handleClose = useCallback(() => setVisible(false), []);
@@ -227,14 +227,18 @@ const ProductGrid = React.memo(({ title, products, showCategories = true }) => {
         </Link>
       </div>
 
-      {filteredProducts.length > 0 ? (
+      {isLoading ? (
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+          {Array.from({ length: 8 }).map((_, index) => (
+            <ProductCardSkeleton key={index} />
+          ))}
+        </div>
+      ) : filteredProducts.length > 0 ? (
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
           {filteredProducts.map((product, index) => (
             <Suspense
               key={index}
-              fallback={
-                <div className="h-64 bg-gray-100 rounded-lg animate-pulse" />
-              }
+              fallback={<ProductCardSkeleton />}
             >
               <ProductCard product={product} />
             </Suspense>
@@ -251,20 +255,19 @@ const ProductGrid = React.memo(({ title, products, showCategories = true }) => {
 
 const HomePage = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [products, setProducts] = useState();
-  const [loading, setLoading] = useState(false);
+  const [products, setProducts] = useState(null);
+  const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
 
   useEffect(() => {
     const fetchProductsData = async () => {
-      setLoading(true)
       try {
         const productData = await fetchProducts();
         setProducts(productData.data);
-        setLoading(false)
       } catch (error) {
         console.log(error);
-        setLoading(false)
+      } finally {
+        setLoading(false);
       }
     };
     fetchProductsData();
@@ -302,36 +305,23 @@ const HomePage = () => {
     };
   }, []);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen w-screen flex items-center justify-center">
-        <div className="flex flex-col items-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary mb-4"></div>
-          <p className="text-gray-600">Loading Products...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="bg-gray-50 min-h-screen">
       <ScrollProgress />
 
-      <main className="pb-12 ">
+      <main className="pb-12">
         <div id="carousel">
           <Carousel slides={carouselSlides} currentSlide={currentSlide} />
         </div>
 
-        {products && (
-          <ProductGrid
-            title="Our Curated Collection"
-            products={products}
-            showCategories={true}
-          />
-        )}
+        <ProductGrid
+          title="Our Curated Collection"
+          products={products}
+          showCategories={true}
+          isLoading={loading}
+        />
       </main>
     </div>
   );
 };
-
 export default React.memo(HomePage);
