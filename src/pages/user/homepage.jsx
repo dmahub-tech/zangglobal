@@ -56,7 +56,7 @@ preloadImage(carouselSlides[0].image);
 // Simplified Carousel with optimized animations
 const Carousel = React.memo(({ slides, currentSlide }) => {
   return (
-    <div className="relative w-full overflow-hidden aspect-[2/1]">
+    <div className="relative h-[50vh] w-full overflow-hidden aspect-[2/1]">
       <AnimatePresence mode="wait">
         <motion.div
           key={currentSlide}
@@ -64,7 +64,7 @@ const Carousel = React.memo(({ slides, currentSlide }) => {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5 }}
-          className="absolute inset-0 bg-cover bg-center"
+          className="absolute inset-0 bg-cover h-full bg-center"
           style={{ backgroundImage: `url(${slides[currentSlide].image})` }}
         >
           <div className="absolute inset-0 bg-gradient-to-r from-black/40 to-black/20 flex items-center">
@@ -83,7 +83,7 @@ const Carousel = React.memo(({ slides, currentSlide }) => {
                 </p>
                 <Link
                   to={slides[currentSlide].ctaLink}
-                  className="inline-flex items-center px-6 py-3 bg-primary hover:bg-primary-dark rounded-lg font-medium transition-all duration-300 group"
+                  className="inline-flex  items-center px-6 py-3 bg-primary hover:bg-primary-dark rounded-lg font-medium transition-all duration-300 group"
                   prefetch="intent"
                 >
                   {slides[currentSlide].cta}

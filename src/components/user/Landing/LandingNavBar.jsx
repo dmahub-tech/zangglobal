@@ -11,6 +11,9 @@ const navItems = {
     { path: "/#contact", label: "Contact" },
     { path: "/store", label: "Shop" },
     { path: "/blogs", label: "Blog" },
+  
+  
+  
   ],
   dropdowns: [
     {
@@ -305,7 +308,7 @@ const Navbar = () => {
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
       >
-        {mobileMenuOpen ? <FiX /> : <FiMenu />}
+        {mobileMeanuOpen ? <FiX /> : <FiMenu />}
       </motion.button>
 
       {/* Mobile Menu */}
