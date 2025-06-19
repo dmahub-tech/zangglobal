@@ -308,7 +308,7 @@ const Navbar = () => {
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
       >
-        {mobileMeanuOpen ? <FiX /> : <FiMenu />}
+        {mobileMenuOpen ? <FiX /> : <FiMenu />}
       </motion.button>
 
       {/* Mobile Menu */}
