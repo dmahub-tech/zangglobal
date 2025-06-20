@@ -4,11 +4,9 @@ import { FiMenu, FiX, FiChevronDown, FiChevronUp } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
 import logo from "../../../assets/images/logoYellow.png";
 
-// ✅ Reordered navigation structure
+// Navigation structure
 const navItems = {
-  main: [
-    { path: "/#welcome", label: "Home" },
-  ],
+  main: [{ path: "/#welcome", label: "Home" }],
   dropdowns: [
     {
       key: "technology",
@@ -38,13 +36,19 @@ const navItems = {
 
 // Reusable Nav Item
 const NavItem = ({ item, onClose }) => (
-  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+  <motion.div
+    whileHover={{ scale: 1.05 }}
+    whileTap={{ scale: 0.95 }}
+    transition={{ duration: 0.2 }}
+  >
     <NavLink
       to={item.path}
       onClick={onClose}
       className={({ isActive }) =>
-        `hover:text-mutedSecondary relative group ${
-          isActive ? "text-mutedSecondary font-medium" : ""
+        `relative group transition-colors ${
+          isActive
+            ? "text-primary font-medium"
+            : "text-secondary hover:text-mutedSecondary"
         }`
       }
     >
@@ -54,27 +58,28 @@ const NavItem = ({ item, onClose }) => (
   </motion.div>
 );
 
-// Dropdown Component
+// Reusable Dropdown
 const Dropdown = ({ items, label, isMobile, onClose }) => {
   const [isOpen, setIsOpen] = useState(false);
+
   const toggleDropdown = (e) => {
     e.stopPropagation();
     setIsOpen(!isOpen);
   };
 
   const dropdownVariants = {
-    open: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 30 } },
-    closed: { opacity: 0, y: -20, transition: { duration: 0.2 } },
+    open: { opacity: 1, y: 0 },
+    closed: { opacity: 0, y: -10 },
   };
 
   const mobileDropdownVariants = {
-    open: { opacity: 1, height: "auto", transition: { staggerChildren: 0.1 } },
-    closed: { opacity: 0, height: 0 },
+    open: { opacity: 1, height: "auto", transition: { staggerChildren: 0.05 } },
+    closed: { opacity: 0, height: 0, overflow: "hidden" },
   };
 
   const itemVariants = {
-    open: { x: 0, opacity: 1 },
-    closed: { x: -20, opacity: 0 },
+    open: { opacity: 1, x: 0 },
+    closed: { opacity: 0, x: -20 },
   };
 
   if (isMobile) {
@@ -82,32 +87,38 @@ const Dropdown = ({ items, label, isMobile, onClose }) => {
       <div className="w-full">
         <button
           onClick={toggleDropdown}
-          className="w-full text-left text-xl hover:text-mutedSecondary flex items-center justify-between py-2"
+          className="w-full text-left text-lg flex items-center justify-between py-2 text-secondary hover:text-mutedSecondary"
         >
-          {label}
-          {isOpen ? <FiChevronUp /> : <FiChevronDown />}
+          {label} {isOpen ? <FiChevronUp /> : <FiChevronDown />}
         </button>
         <AnimatePresence>
           {isOpen && (
             <motion.div
-              className="flex flex-col text-sm bg-mutedSecondary/10 rounded-md overflow-hidden mt-2 ml-4"
+              className="flex flex-col bg-white/10 rounded-md mt-2 ml-4 backdrop-blur-sm overflow-hidden"
               initial="closed"
               animate="open"
               exit="closed"
               variants={mobileDropdownVariants}
             >
               {items.map((item, index) => (
-                <motion.div key={index} variants={itemVariants} onClick={onClose}>
-                  <NavLink
-                    to={item.path}
+                <motion.div
+                  key={index}
+                  variants={itemVariants}
+                  className="px-4 py-2"
+                >
+                  <a
+                    href={item.path}
+                    onClick={onClose}
                     className={({ isActive }) =>
-                      `block px-5 py-3 text-sm hover:bg-mutedSecondary/20 rounded-md ${
-                        isActive ? "text-primary font-medium" : ""
+                      `block text-sm rounded-md ${
+                        isActive
+                          ? "text-primary font-medium"
+                          : "text-secondary hover:text-mutedSecondary"
                       }`
                     }
                   >
                     {item.label}
-                  </NavLink>
+                  </a>
                 </motion.div>
               ))}
             </motion.div>
@@ -118,10 +129,10 @@ const Dropdown = ({ items, label, isMobile, onClose }) => {
   }
 
   return (
-    <div className="relative dropdown">
+    <div className="relative">
       <button
         onClick={toggleDropdown}
-        className="hover:text-mutedSecondary flex items-center gap-1 relative group"
+        className="flex items-center gap-1 text-secondary hover:text-mutedSecondary group relative"
       >
         {label}
         {isOpen ? <FiChevronUp /> : <FiChevronDown />}
@@ -130,7 +141,7 @@ const Dropdown = ({ items, label, isMobile, onClose }) => {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            className={`absolute left-0 mt-2 min-w-[200px] bg-mutedSecondary/95 backdrop-blur-sm text-gray-700 rounded-lg shadow-xl overflow-hidden z-50`}
+            className="absolute left-0 mt-2 min-w-[200px] bg-white shadow-md rounded-md overflow-hidden z-50"
             initial="closed"
             animate="open"
             exit="closed"
@@ -142,11 +153,11 @@ const Dropdown = ({ items, label, isMobile, onClose }) => {
                 to={item.path}
                 onClick={onClose}
                 className={({ isActive }) =>
-                  `block px-5 py-3 text-sm hover:bg-gray-100/50 ${
-                    index < items.length - 1 ? "border-b border-gray-200/50" : ""
-                  } hover:text-primary transition duration-200 ${
-                    isActive ? "bg-gray-100/70" : ""
-                  }`
+                  `block px-4 py-3 text-sm transition-colors ${
+                    isActive
+                      ? "text-primary font-medium bg-gray-100"
+                      : "text-secondary hover:bg-gray-50 hover:text-mutedSecondary"
+                  } ${index < items.length - 1 ? "border-b border-gray-200" : ""}`
                 }
               >
                 {item.label}
@@ -159,22 +170,23 @@ const Dropdown = ({ items, label, isMobile, onClose }) => {
   );
 };
 
-// Mobile Menu
+// Mobile Slide Menu
 const MobileMenu = ({ isOpen, onClose }) => {
   const menuVariants = {
-    open: { x: 0, transition: { type: "spring", stiffness: 300, damping: 30 } },
-    closed: { x: "-100%", transition: { type: "spring", stiffness: 300, damping: 30 } },
+    open: { x: 0 },
+    closed: { x: "-100%" },
   };
 
   return (
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className="fixed top-0 left-0 w-full h-full bg-primary/95 backdrop-blur-sm text-secondary shadow-lg flex flex-col items-start px-8 py-24 space-y-6 z-40"
+          className="fixed top-0 left-0 w-full h-full bg-primary/95 text-secondary px-6 py-20 z-50 flex flex-col space-y-5"
           initial="closed"
           animate="open"
           exit="closed"
           variants={menuVariants}
+          transition={{ type: "spring", stiffness: 300, damping: 30 }}
         >
           {navItems.main.map((item, index) => (
             <NavItem key={`mobile-main-${index}`} item={item} onClose={onClose} />
@@ -184,7 +196,7 @@ const MobileMenu = ({ isOpen, onClose }) => {
               key={`mobile-dropdown-${index}`}
               items={dropdown.items}
               label={dropdown.label}
-              isMobile={true}
+              isMobile
               onClose={onClose}
             />
           ))}
@@ -197,31 +209,33 @@ const MobileMenu = ({ isOpen, onClose }) => {
   );
 };
 
-// Main Navbar
+// Navbar Component
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
-  const toggleMenu = () => setMobileMenuOpen(!mobileMenuOpen);
+  const toggleMenu = () => setMobileMenuOpen((prev) => !prev);
   const closeMenu = () => setMobileMenuOpen(false);
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 10);
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 10);
+    };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
     <motion.nav
-      className={`sticky top-0 left-0 w-full text-secondary shadow-lg py-3 px-5 flex justify-between items-center z-50 ${
+      className={`sticky top-0 left-0 z-50 w-full py-3 px-4 md:px-8 flex items-center justify-between shadow-md transition-all ${
         scrolled ? "bg-primary/95 backdrop-blur-sm" : "bg-primary"
       }`}
-      initial={{ y: -100 }}
+      initial={{ y: -80 }}
       animate={{ y: 0 }}
-      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+      transition={{ type: "spring", stiffness: 300, damping: 24 }}
     >
       {/* Logo */}
-      <Link to="/" className="flex items-center gap-2 z-50">
+      <Link to="/" className="z-50">
         <motion.img
           src={logo}
           alt="Logo"
@@ -234,8 +248,8 @@ const Navbar = () => {
         />
       </Link>
 
-      {/* Desktop Menu */}
-      <div className="hidden md:flex space-x-6 font-medium items-center relative">
+      {/* Desktop Navigation */}
+      <div className="hidden md:flex space-x-6 items-center font-medium">
         {navItems.main.map((item, index) => (
           <NavItem key={`desktop-main-${index}`} item={item} onClose={closeMenu} />
         ))}
@@ -252,18 +266,18 @@ const Navbar = () => {
         ))}
       </div>
 
-      {/* Mobile Toggle */}
+      {/* Mobile Menu Button */}
       <motion.button
         onClick={toggleMenu}
-        aria-label="Toggle Menu"
-        className="md:hidden text-secondary text-3xl z-50"
+        aria-label="Toggle menu"
+        className="md:hidden text-3xl z-50 text-secondary"
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
       >
         {mobileMenuOpen ? <FiX /> : <FiMenu />}
       </motion.button>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu Panel */}
       <MobileMenu isOpen={mobileMenuOpen} onClose={closeMenu} />
     </motion.nav>
   );
