@@ -4,16 +4,10 @@ import { FiMenu, FiX, FiChevronDown, FiChevronUp } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
 import logo from "../../../assets/images/logoYellow.png";
 
-// 1. Define navigation data structure (can be moved to a separate config file)
+// ✅ Reordered navigation structure
 const navItems = {
   main: [
     { path: "/#welcome", label: "Home" },
-    { path: "/#contact", label: "Contact" },
-    { path: "/store", label: "Shop" },
-    { path: "/blogs", label: "Blog" },
-  
-  
-  
   ],
   dropdowns: [
     {
@@ -28,7 +22,7 @@ const navItems = {
     },
     {
       key: "company",
-      label: "About Us",
+      label: "About",
       items: [
         { path: "/#why-us", label: "Why Us" },
         { path: "/#achievements", label: "Achievements" },
@@ -36,41 +30,46 @@ const navItems = {
       ],
     },
   ],
+  footer: [
+    { path: "/store", label: "Shop" },
+    { path: "/blogs", label: "Blog" },
+  ],
 };
 
-// 2. Reusable Dropdown Component
+// Reusable Nav Item
+const NavItem = ({ item, onClose }) => (
+  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+    <NavLink
+      to={item.path}
+      onClick={onClose}
+      className={({ isActive }) =>
+        `hover:text-mutedSecondary relative group ${
+          isActive ? "text-mutedSecondary font-medium" : ""
+        }`
+      }
+    >
+      {item.label}
+      <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-mutedSecondary group-hover:w-full transition-all duration-300"></span>
+    </NavLink>
+  </motion.div>
+);
+
+// Dropdown Component
 const Dropdown = ({ items, label, isMobile, onClose }) => {
   const [isOpen, setIsOpen] = useState(false);
-
   const toggleDropdown = (e) => {
     e.stopPropagation();
     setIsOpen(!isOpen);
   };
 
-  // Animation variants
   const dropdownVariants = {
-    open: {
-      opacity: 1,
-      y: 0,
-      transition: { type: "spring", stiffness: 300, damping: 30 },
-    },
-    closed: {
-      opacity: 0,
-      y: -20,
-      transition: { duration: 0.2 },
-    },
+    open: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 30 } },
+    closed: { opacity: 0, y: -20, transition: { duration: 0.2 } },
   };
 
   const mobileDropdownVariants = {
-    open: {
-      opacity: 1,
-      height: "auto",
-      transition: { staggerChildren: 0.1 },
-    },
-    closed: {
-      opacity: 0,
-      height: 0,
-    },
+    open: { opacity: 1, height: "auto", transition: { staggerChildren: 0.1 } },
+    closed: { opacity: 0, height: 0 },
   };
 
   const itemVariants = {
@@ -88,7 +87,6 @@ const Dropdown = ({ items, label, isMobile, onClose }) => {
           {label}
           {isOpen ? <FiChevronUp /> : <FiChevronDown />}
         </button>
-
         <AnimatePresence>
           {isOpen && (
             <motion.div
@@ -99,11 +97,7 @@ const Dropdown = ({ items, label, isMobile, onClose }) => {
               variants={mobileDropdownVariants}
             >
               {items.map((item, index) => (
-                <motion.div
-                  key={index}
-                  variants={itemVariants}
-                  onClick={onClose}
-                >
+                <motion.div key={index} variants={itemVariants} onClick={onClose}>
                   <NavLink
                     to={item.path}
                     className={({ isActive }) =>
@@ -133,13 +127,10 @@ const Dropdown = ({ items, label, isMobile, onClose }) => {
         {isOpen ? <FiChevronUp /> : <FiChevronDown />}
         <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-mutedSecondary group-hover:w-full transition-all duration-300"></span>
       </button>
-
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            className={`absolute ${
-              label === "Technology" ? "left-[-60px]" : "left-0"
-            } mt-2 min-w-[200px] bg-mutedSecondary/95 backdrop-blur-sm text-gray-700 rounded-lg shadow-xl overflow-hidden z-50`}
+            className={`absolute left-0 mt-2 min-w-[200px] bg-mutedSecondary/95 backdrop-blur-sm text-gray-700 rounded-lg shadow-xl overflow-hidden z-50`}
             initial="closed"
             animate="open"
             exit="closed"
@@ -149,6 +140,7 @@ const Dropdown = ({ items, label, isMobile, onClose }) => {
               <NavLink
                 key={index}
                 to={item.path}
+                onClick={onClose}
                 className={({ isActive }) =>
                   `block px-5 py-3 text-sm hover:bg-gray-100/50 ${
                     index < items.length - 1 ? "border-b border-gray-200/50" : ""
@@ -156,7 +148,6 @@ const Dropdown = ({ items, label, isMobile, onClose }) => {
                     isActive ? "bg-gray-100/70" : ""
                   }`
                 }
-                onClick={onClose}
               >
                 {item.label}
               </NavLink>
@@ -168,41 +159,11 @@ const Dropdown = ({ items, label, isMobile, onClose }) => {
   );
 };
 
-// 3. Reusable NavItem Component
-const NavItem = ({ item, onClose }) => {
-  return (
-    <motion.div
-      whileHover={{ scale: 1.05, color: "#f5f5f5" }}
-      whileTap={{ scale: 0.95 }}
-      transition={{ duration: 0.2 }}
-    >
-      <NavLink
-        to={item.path}
-        className={({ isActive }) =>
-          `hover:text-mutedSecondary relative group ${
-            isActive ? "text-mutedSecondary font-medium" : ""
-          }`
-        }
-        onClick={onClose}
-      >
-        {item.label}
-        <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-mutedSecondary group-hover:w-full transition-all duration-300"></span>
-      </NavLink>
-    </motion.div>
-  );
-};
-
-// 4. Mobile Menu Component
+// Mobile Menu
 const MobileMenu = ({ isOpen, onClose }) => {
   const menuVariants = {
-    open: {
-      x: 0,
-      transition: { type: "spring", stiffness: 300, damping: 30 },
-    },
-    closed: {
-      x: "-100%",
-      transition: { type: "spring", stiffness: 300, damping: 30 },
-    },
+    open: { x: 0, transition: { type: "spring", stiffness: 300, damping: 30 } },
+    closed: { x: "-100%", transition: { type: "spring", stiffness: 300, damping: 30 } },
   };
 
   return (
@@ -216,15 +177,8 @@ const MobileMenu = ({ isOpen, onClose }) => {
           variants={menuVariants}
         >
           {navItems.main.map((item, index) => (
-            <motion.div
-              key={`mobile-main-${index}`}
-              whileHover={{ x: 5 }}
-              transition={{ type: "spring", stiffness: 300 }}
-            >
-              <NavItem item={item} onClose={onClose} />
-            </motion.div>
+            <NavItem key={`mobile-main-${index}`} item={item} onClose={onClose} />
           ))}
-
           {navItems.dropdowns.map((dropdown, index) => (
             <Dropdown
               key={`mobile-dropdown-${index}`}
@@ -234,29 +188,25 @@ const MobileMenu = ({ isOpen, onClose }) => {
               onClose={onClose}
             />
           ))}
+          {navItems.footer.map((item, index) => (
+            <NavItem key={`mobile-footer-${index}`} item={item} onClose={onClose} />
+          ))}
         </motion.div>
       )}
     </AnimatePresence>
   );
 };
 
-// 5. Main Navbar Component
+// Main Navbar
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
-  const toggleMenu = () => {
-    setMobileMenuOpen(!mobileMenuOpen);
-  };
-
-  const closeMenu = () => {
-    setMobileMenuOpen(false);
-  };
+  const toggleMenu = () => setMobileMenuOpen(!mobileMenuOpen);
+  const closeMenu = () => setMobileMenuOpen(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 10);
-    };
+    const handleScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -274,7 +224,7 @@ const Navbar = () => {
       <Link to="/" className="flex items-center gap-2 z-50">
         <motion.img
           src={logo}
-          alt="Company Logo"
+          alt="Logo"
           width={100}
           height={50}
           loading="lazy"
@@ -284,12 +234,11 @@ const Navbar = () => {
         />
       </Link>
 
-      {/* Desktop Navigation */}
-      <div className="hidden md:flex space-x-6 font-medium relative items-center">
+      {/* Desktop Menu */}
+      <div className="hidden md:flex space-x-6 font-medium items-center relative">
         {navItems.main.map((item, index) => (
           <NavItem key={`desktop-main-${index}`} item={item} onClose={closeMenu} />
         ))}
-
         {navItems.dropdowns.map((dropdown, index) => (
           <Dropdown
             key={`desktop-dropdown-${index}`}
@@ -298,12 +247,15 @@ const Navbar = () => {
             onClose={closeMenu}
           />
         ))}
+        {navItems.footer.map((item, index) => (
+          <NavItem key={`desktop-footer-${index}`} item={item} onClose={closeMenu} />
+        ))}
       </div>
 
-      {/* Mobile Menu Button */}
+      {/* Mobile Toggle */}
       <motion.button
         onClick={toggleMenu}
-        aria-label="Toggle menu"
+        aria-label="Toggle Menu"
         className="md:hidden text-secondary text-3xl z-50"
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
