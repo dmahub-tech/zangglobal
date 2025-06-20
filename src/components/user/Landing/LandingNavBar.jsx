@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { FiMenu, FiX, FiChevronDown, FiChevronUp } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
 import logo from "../../../assets/images/logoYellow.png";
+import { X } from "lucide-react";
 
 // Navigation structure
 const navItems = {
@@ -35,18 +36,22 @@ const navItems = {
 };
 
 // Reusable Nav Item
-const NavItem = ({ item, onClose }) => (
+const NavItem = ({ item, onClose }) => {
+  
+  const location = useLocation()
+  const pathname = location.pathname
+  return(
   <motion.div
     whileHover={{ scale: 1.05 }}
     whileTap={{ scale: 0.95 }}
     transition={{ duration: 0.2 }}
   >
-    <NavLink
-      to={item.path}
+    <a
+      href={item.path}
       onClick={onClose}
-      className={({ isActive }) =>
+      className={
         `relative group transition-colors ${
-          isActive
+          pathname == item.path
             ? "text-primary font-medium"
             : "text-secondary hover:text-mutedSecondary"
         }`
@@ -54,9 +59,9 @@ const NavItem = ({ item, onClose }) => (
     >
       {item.label}
       <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-mutedSecondary group-hover:w-full transition-all duration-300"></span>
-    </NavLink>
+    </a>
   </motion.div>
-);
+)};
 
 // Reusable Dropdown
 const Dropdown = ({ items, label, isMobile, onClose }) => {
@@ -148,9 +153,9 @@ const Dropdown = ({ items, label, isMobile, onClose }) => {
             variants={dropdownVariants}
           >
             {items.map((item, index) => (
-              <NavLink
+              <a
                 key={index}
-                to={item.path}
+                href={item.path}
                 onClick={onClose}
                 className={({ isActive }) =>
                   `block px-4 py-3 text-sm transition-colors ${
@@ -161,7 +166,7 @@ const Dropdown = ({ items, label, isMobile, onClose }) => {
                 }
               >
                 {item.label}
-              </NavLink>
+              </a>
             ))}
           </motion.div>
         )}
@@ -171,7 +176,7 @@ const Dropdown = ({ items, label, isMobile, onClose }) => {
 };
 
 // Mobile Slide Menu
-const MobileMenu = ({ isOpen, onClose }) => {
+const MobileMenu = ({ isOpen, setIsOpen, onClose }) => {
   const menuVariants = {
     open: { x: 0 },
     closed: { x: "-100%" },
@@ -181,13 +186,16 @@ const MobileMenu = ({ isOpen, onClose }) => {
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className="fixed top-0 left-0 w-full h-full bg-primary/95 text-secondary px-6 py-20 z-50 flex flex-col space-y-5"
+          className="absolute top-0 left-0 w-full h-screen bg-primary/95 text-secondary px-6 py-20 z-50 flex flex-col space-y-5"
           initial="closed"
           animate="open"
           exit="closed"
           variants={menuVariants}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
         >
+          <button onClick={()=>setIsOpen(!isOpen)}>
+            <X />
+          </button>
           {navItems.main.map((item, index) => (
             <NavItem key={`mobile-main-${index}`} item={item} onClose={onClose} />
           ))}
@@ -278,9 +286,8 @@ const Navbar = () => {
       </motion.button>
 
       {/* Mobile Menu Panel */}
-      <MobileMenu isOpen={mobileMenuOpen} onClose={closeMenu} />
+      <MobileMenu isOpen={mobileMenuOpen} setIsOpen={setMobileMenuOpen} onClose={closeMenu} />
     </motion.nav>
   );
 };
-
 export default Navbar;
