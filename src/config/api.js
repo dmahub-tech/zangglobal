@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://web-ecommerce-backend-jj6f.onrender.com",
+  baseURL: "https://zangglobal-backend.onrender.com",
   headers: {
     "Content-Type": "application/json; charset=utf-8",
   },

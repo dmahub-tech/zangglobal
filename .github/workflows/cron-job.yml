@@ -1,0 +1,14 @@
+name: Keep Render Awake + Fetch Products
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"  # Every 5 minutes
+  workflow_dispatch:
+
+jobs:
+  fetch-products:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Ping product fetch endpoint to keep backend alive
+        run: curl -X POST https://your-backend.onrender.com/api/cron

@@ -40,6 +40,7 @@ const NavItem = ({ item, onClose }) => {
   
   const location = useLocation()
   const pathname = location.pathname
+  console.log(pathname)
   return(
   <motion.div
     whileHover={{ scale: 1.05 }}
