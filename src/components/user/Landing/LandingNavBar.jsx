@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { FiMenu, FiX, FiChevronDown, FiChevronUp } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
@@ -35,43 +35,52 @@ const navItems = {
   ],
 };
 
-// Reusable Nav Item
+// NavItem
 const NavItem = ({ item, onClose }) => {
-  
-  const location = useLocation()
-  const pathname = location.pathname
-  console.log(pathname)
-  return(
-  <motion.div
-    whileHover={{ scale: 1.05 }}
-    whileTap={{ scale: 0.95 }}
-    transition={{ duration: 0.2 }}
-  >
-    <a
-      href={item.path}
-      onClick={onClose}
-      className={
-        `relative group transition-colors ${
-          pathname == item.path
-            ? "text-primary font-medium"
-            : "text-secondary hover:text-mutedSecondary"
-        }`
-      }
-    >
-      {item.label}
-      <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-mutedSecondary group-hover:w-full transition-all duration-300"></span>
-    </a>
-  </motion.div>
-)};
+  const location = useLocation();
+  const isActive = location.pathname === item.path;
 
-// Reusable Dropdown
+  return (
+    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} transition={{ duration: 0.2 }}>
+      <a
+        href={item.path}
+        onClick={onClose}
+        className={`relative group transition-colors ${
+          isActive ? "text-primary font-medium" : "text-secondary hover:text-mutedSecondary"
+        }`}
+      >
+        {item.label}
+        <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-mutedSecondary group-hover:w-full transition-all duration-300"></span>
+      </a>
+    </motion.div>
+  );
+};
+
+// Dropdown
 const Dropdown = ({ items, label, isMobile, onClose }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+  const location = useLocation();
+  const pathname = location.pathname;
 
   const toggleDropdown = (e) => {
     e.stopPropagation();
-    setIsOpen(!isOpen);
+    setIsOpen((prev) => !prev);
   };
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setIsOpen(false);
+      }
+    };
+
+    if (!isMobile && isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isOpen, isMobile]);
 
   const dropdownVariants = {
     open: { opacity: 1, y: 0 },
@@ -106,27 +115,22 @@ const Dropdown = ({ items, label, isMobile, onClose }) => {
               exit="closed"
               variants={mobileDropdownVariants}
             >
-              {items.map((item, index) => (
-                <motion.div
-                  key={index}
-                  variants={itemVariants}
-                  className="px-4 py-2"
-                >
-                  <a
-                    href={item.path}
-                    onClick={onClose}
-                    className={({ isActive }) =>
-                      `block text-sm rounded-md ${
-                        isActive
-                          ? "text-primary font-medium"
-                          : "text-secondary hover:text-mutedSecondary"
-                      }`
-                    }
-                  >
-                    {item.label}
-                  </a>
-                </motion.div>
-              ))}
+              {items.map((item, index) => {
+                const isActive = pathname === item.path;
+                return (
+                  <motion.div key={index} variants={itemVariants} className="px-4 py-2">
+                    <a
+                      href={item.path}
+                      onClick={onClose}
+                      className={`block text-sm p-1 rounded-md ${
+                        isActive ? "text-primary font-medium" : "text-secondary hover:text-mutedSecondary"
+                      }`}
+                    >
+                      {item.label}
+                    </a>
+                  </motion.div>
+                );
+              })}
             </motion.div>
           )}
         </AnimatePresence>
@@ -135,10 +139,12 @@ const Dropdown = ({ items, label, isMobile, onClose }) => {
   }
 
   return (
-    <div className="relative">
+    <div className="relative" ref={dropdownRef}>
       <button
         onClick={toggleDropdown}
         className="flex items-center gap-1 text-secondary hover:text-mutedSecondary group relative"
+        aria-expanded={isOpen}
+        aria-controls={`dropdown-${label}`}
       >
         {label}
         {isOpen ? <FiChevronUp /> : <FiChevronDown />}
@@ -147,28 +153,30 @@ const Dropdown = ({ items, label, isMobile, onClose }) => {
       <AnimatePresence>
         {isOpen && (
           <motion.div
+            id={`dropdown-${label}`}
             className="absolute left-0 mt-2 min-w-[200px] bg-white shadow-md rounded-md overflow-hidden z-50"
             initial="closed"
             animate="open"
             exit="closed"
             variants={dropdownVariants}
           >
-            {items.map((item, index) => (
-              <a
-                key={index}
-                href={item.path}
-                onClick={onClose}
-                className={({ isActive }) =>
-                  `block px-4 py-3 text-sm transition-colors ${
+            {items.map((item, index) => {
+              const isActive = pathname === item.path;
+              return (
+                <a
+                  key={index}
+                  href={item.path}
+                  onClick={onClose}
+                  className={`block px-4 py-3 text-sm transition-colors ${
                     isActive
                       ? "text-primary font-medium bg-gray-100"
-                      : "text-secondary hover:bg-gray-50 hover:text-mutedSecondary"
-                  } ${index < items.length - 1 ? "border-b border-gray-200" : ""}`
-                }
-              >
-                {item.label}
-              </a>
-            ))}
+                      : "text-mutedPrimary hover:bg-gray-50 hover:text-primary"
+                  } ${index < items.length - 1 ? "border-b border-gray-200" : ""}`}
+                >
+                  {item.label}
+                </a>
+              );
+            })}
           </motion.div>
         )}
       </AnimatePresence>
@@ -176,7 +184,7 @@ const Dropdown = ({ items, label, isMobile, onClose }) => {
   );
 };
 
-// Mobile Slide Menu
+// Mobile Menu
 const MobileMenu = ({ isOpen, setIsOpen, onClose }) => {
   const menuVariants = {
     open: { x: 0 },
@@ -187,14 +195,14 @@ const MobileMenu = ({ isOpen, setIsOpen, onClose }) => {
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className="absolute top-0 left-0 w-full h-screen bg-primary/95 text-secondary px-6 py-20 z-50 flex flex-col space-y-5"
+          className="fixed inset-0 bg-primary/95 text-secondary px-6 py-20 z-50 flex flex-col space-y-5 overflow-y-auto"
           initial="closed"
           animate="open"
           exit="closed"
           variants={menuVariants}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
         >
-          <button onClick={()=>setIsOpen(!isOpen)}>
+          <button onClick={() => setIsOpen(false)} className="self-end mb-6">
             <X />
           </button>
           {navItems.main.map((item, index) => (
@@ -218,7 +226,7 @@ const MobileMenu = ({ isOpen, setIsOpen, onClose }) => {
   );
 };
 
-// Navbar Component
+// Navbar
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -257,25 +265,20 @@ const Navbar = () => {
         />
       </Link>
 
-      {/* Desktop Navigation */}
+      {/* Desktop nav */}
       <div className="hidden md:flex space-x-6 items-center font-medium">
         {navItems.main.map((item, index) => (
           <NavItem key={`desktop-main-${index}`} item={item} onClose={closeMenu} />
         ))}
         {navItems.dropdowns.map((dropdown, index) => (
-          <Dropdown
-            key={`desktop-dropdown-${index}`}
-            items={dropdown.items}
-            label={dropdown.label}
-            onClose={closeMenu}
-          />
+          <Dropdown key={`desktop-dropdown-${index}`} items={dropdown.items} label={dropdown.label} onClose={closeMenu} />
         ))}
         {navItems.footer.map((item, index) => (
           <NavItem key={`desktop-footer-${index}`} item={item} onClose={closeMenu} />
         ))}
       </div>
 
-      {/* Mobile Menu Button */}
+      {/* Mobile button */}
       <motion.button
         onClick={toggleMenu}
         aria-label="Toggle menu"
@@ -286,9 +289,10 @@ const Navbar = () => {
         {mobileMenuOpen ? <FiX /> : <FiMenu />}
       </motion.button>
 
-      {/* Mobile Menu Panel */}
+      {/* Mobile panel */}
       <MobileMenu isOpen={mobileMenuOpen} setIsOpen={setMobileMenuOpen} onClose={closeMenu} />
     </motion.nav>
   );
 };
+
 export default Navbar;
