@@ -82,14 +82,14 @@ function App() {
                 </AdminAuthProvider>
               }
             />
-            <Route
+            {/* <Route
               path="/admin/signup"
               element={
                 <AdminAuthProvider>
                   <RegisterAdmin />
                 </AdminAuthProvider>
               }
-            />
+            /> */}
 
             {/* Store (User Area) */}
             <Route element={<StoreLayout />}>
