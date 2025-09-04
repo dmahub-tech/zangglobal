@@ -41,12 +41,18 @@ const NavItem = ({ item, onClose }) => {
   const isActive = location.pathname === item.path;
 
   return (
-    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} transition={{ duration: 0.2 }}>
+    <motion.div
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+      transition={{ duration: 0.2 }}
+    >
       <a
         href={item.path}
         onClick={onClose}
         className={`relative group transition-colors ${
-          isActive ? "text-primary font-medium" : "text-secondary hover:text-mutedSecondary"
+          isActive
+            ? "text-primary font-medium"
+            : "text-secondary hover:text-mutedSecondary"
         }`}
       >
         {item.label}
@@ -118,12 +124,18 @@ const Dropdown = ({ items, label, isMobile, onClose }) => {
               {items.map((item, index) => {
                 const isActive = pathname === item.path;
                 return (
-                  <motion.div key={index} variants={itemVariants} className="px-4 py-2">
+                  <motion.div
+                    key={index}
+                    variants={itemVariants}
+                    className="px-4 py-2"
+                  >
                     <a
                       href={item.path}
                       onClick={onClose}
                       className={`block text-sm p-1 rounded-md ${
-                        isActive ? "text-primary font-medium" : "text-secondary hover:text-mutedSecondary"
+                        isActive
+                          ? "text-primary font-medium"
+                          : "text-secondary hover:text-mutedSecondary"
                       }`}
                     >
                       {item.label}
@@ -171,7 +183,9 @@ const Dropdown = ({ items, label, isMobile, onClose }) => {
                     isActive
                       ? "text-primary font-medium bg-gray-100"
                       : "text-mutedPrimary hover:bg-gray-50 hover:text-primary"
-                  } ${index < items.length - 1 ? "border-b border-gray-200" : ""}`}
+                  } ${
+                    index < items.length - 1 ? "border-b border-gray-200" : ""
+                  }`}
                 >
                   {item.label}
                 </a>
@@ -206,7 +220,11 @@ const MobileMenu = ({ isOpen, setIsOpen, onClose }) => {
             <X />
           </button>
           {navItems.main.map((item, index) => (
-            <NavItem key={`mobile-main-${index}`} item={item} onClose={onClose} />
+            <NavItem
+              key={`mobile-main-${index}`}
+              item={item}
+              onClose={onClose}
+            />
           ))}
           {navItems.dropdowns.map((dropdown, index) => (
             <Dropdown
@@ -218,7 +236,11 @@ const MobileMenu = ({ isOpen, setIsOpen, onClose }) => {
             />
           ))}
           {navItems.footer.map((item, index) => (
-            <NavItem key={`mobile-footer-${index}`} item={item} onClose={onClose} />
+            <NavItem
+              key={`mobile-footer-${index}`}
+              item={item}
+              onClose={onClose}
+            />
           ))}
         </motion.div>
       )}
@@ -268,13 +290,26 @@ const Navbar = () => {
       {/* Desktop nav */}
       <div className="hidden md:flex space-x-6 items-center font-medium">
         {navItems.main.map((item, index) => (
-          <NavItem key={`desktop-main-${index}`} item={item} onClose={closeMenu} />
+          <NavItem
+            key={`desktop-main-${index}`}
+            item={item}
+            onClose={closeMenu}
+          />
         ))}
         {navItems.dropdowns.map((dropdown, index) => (
-          <Dropdown key={`desktop-dropdown-${index}`} items={dropdown.items} label={dropdown.label} onClose={closeMenu} />
+          <Dropdown
+            key={`desktop-dropdown-${index}`}
+            items={dropdown.items}
+            label={dropdown.label}
+            onClose={closeMenu}
+          />
         ))}
         {navItems.footer.map((item, index) => (
-          <NavItem key={`desktop-footer-${index}`} item={item} onClose={closeMenu} />
+          <NavItem
+            key={`desktop-footer-${index}`}
+            item={item}
+            onClose={closeMenu}
+          />
         ))}
       </div>
 
@@ -290,7 +325,11 @@ const Navbar = () => {
       </motion.button>
 
       {/* Mobile panel */}
-      <MobileMenu isOpen={mobileMenuOpen} setIsOpen={setMobileMenuOpen} onClose={closeMenu} />
+      <MobileMenu
+        isOpen={mobileMenuOpen}
+        setIsOpen={setMobileMenuOpen}
+        onClose={closeMenu}
+      />
     </motion.nav>
   );
 };
