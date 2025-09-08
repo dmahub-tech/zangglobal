@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import moment from 'moment';
-import api from '../../config/api';
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import moment from "moment";
+import api from "../../config/api";
 
 const BlogDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [blog, setBlog] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [comment, setComment] = useState('');
+  const [error, setError] = useState("");
+  const [comment, setComment] = useState("");
   const [comments, setComments] = useState([]);
   const [isCommenting, setIsCommenting] = useState(false);
 
@@ -18,70 +18,68 @@ const BlogDetail = () => {
       try {
         // Increment view count
         await api.post(`/blogs/${id}/view`);
-        
+
         // Fetch blog details
         const blogRes = await api.get(`/blogs/${id}`);
         if (blogRes.data.status) {
           setBlog(blogRes.data.post);
         } else {
-          setError('Blog not found');
+          setError("Blog not found");
         }
 
-        console.log(blogRes.data.post);
-        
         // Fetch comments
         // const commentsRes = await api.get(`/blogs/${id}/comments`);
         // if (commentsRes.data.status) {
         //   setComments(commentsRes.data.comments);
         // }
       } catch (err) {
-        setError(err.response?.data?.message || 'Error loading blog');
+        setError(err.response?.data?.message || "Error loading blog");
       } finally {
         setLoading(false);
       }
     };
-    
+
     fetchBlog();
   }, [id]);
 
   const handleLike = async () => {
     try {
       await api.post(`/blogs/${id}/like`);
-      setBlog(prev => ({
+      setBlog((prev) => ({
         ...prev,
-        likes: prev.likes + 1
+        likes: prev.likes + 1,
+        isLiked: true,
       }));
     } catch (err) {
-      setError(err.response?.data?.message || 'Error liking post');
+      setError(err.response?.data?.message || "Error liking post");
     }
   };
 
   const handleDislike = async () => {
     try {
       await api.post(`/blogs/${id}/dislike`);
-      setBlog(prev => ({
+      setBlog((prev) => ({
         ...prev,
-        dislikes: prev.dislikes + 1
+        dislikes: prev.dislikes + 1,
+        isDisliked: true,
       }));
     } catch (err) {
-      setError(err.response?.data?.message || 'Error disliking post');
+      setError(err.response?.data?.message || "Error disliking post");
     }
   };
 
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
     if (!comment.trim()) return;
-    
+
     setIsCommenting(true);
     try {
       const response = await api.post(`/blogs/${id}/comments`, {
-        content: comment
+        content: comment,
       });
 
-      console.log(response.data);
-      
       if (response.data.status) {
-        setComment('');
+        setComment("");
         // Refresh comments
         const commentsRes = await api.get(`/blogs/${id}/comments`);
         if (commentsRes.data.status) {
@@ -89,31 +87,31 @@ const BlogDetail = () => {
         }
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Error adding comment');
+      setError(err.response?.data?.message || "Error adding comment");
     } finally {
       setIsCommenting(false);
     }
   };
 
   const handleDeleteComment = async (commentId) => {
-    if (window.confirm('Are you sure you want to delete this comment?')) {
+    if (window.confirm("Are you sure you want to delete this comment?")) {
       try {
         const response = await api.delete(`/blogs/${id}/comments/${commentId}`);
         if (response.data.status) {
-          setComments(prev => prev.filter(c => c._id !== commentId));
+          setComments((prev) => prev.filter((c) => c._id !== commentId));
         }
       } catch (err) {
-        setError(err.response?.data?.message || 'Error deleting comment');
+        setError(err.response?.data?.message || "Error deleting comment");
       }
     }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-accent border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="mt-4 text-primary font-medium">Loading blog post...</p>
+          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="mt-4 text-gray-600 font-medium">Loading blog post...</p>
         </div>
       </div>
     );
@@ -121,13 +119,30 @@ const BlogDetail = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="bg-white p-6 rounded-lg shadow-md max-w-md w-full text-center">
-          <h2 className="text-xl font-bold text-primary mb-2">Error</h2>
-          <p className="text-gray-700 mb-4">{error}</p>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+        <div className="bg-white p-8 rounded-xl shadow-lg max-w-md w-full text-center">
+          <div className="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
+            <svg
+              className="w-8 h-8 text-red-500"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              ></path>
+            </svg>
+          </div>
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">
+            Oops! Something went wrong
+          </h2>
+          <p className="text-gray-600 mb-6">{error}</p>
           <button
-            onClick={() => navigate('/blogs')}
-            className="px-4 py-2 bg-accent text-white rounded-md hover:bg-orange-600"
+            onClick={() => navigate("/blogs")}
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-md"
           >
             Back to Blogs
           </button>
@@ -137,137 +152,280 @@ const BlogDetail = () => {
   }
 
   return (
-    <div className="min-h-screen  py-8 px-2">
+    <div className="min-h-screen bg-gray-50 py-8 px-4">
       <div className="max-w-4xl mx-auto">
+        {/* Back Button */}
+        <button
+          onClick={() => navigate("/blogs")}
+          className="flex items-center text-blue-600 hover:text-blue-800 mb-6 transition-colors"
+        >
+          <svg
+            className="w-5 h-5 mr-2"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M10 19l-7-7m0 0l7-7m-7 7h18"
+            ></path>
+          </svg>
+          Back to Blogs
+        </button>
+
         {/* Blog Post */}
-        <div className="bg-white rounded-lg overflow-hidden mb-8">
+        <div className="bg-white rounded-xl overflow-hidden shadow-lg mb-8 transition-all hover:shadow-xl">
           {blog.image && (
-            <img 
-              src={blog.image} 
-              alt={blog.title} 
-              className="w-full h-64 md:h-96 object-cover"
-            />
-          )}
-          
-          <div className="p-6">
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <span className="inline-block px-3 py-1 bg-mutedSecondary text-primary rounded-full text-sm font-medium">
+            <div className="relative h-64 md:h-96 overflow-hidden">
+              <img
+                src={blog.image}
+                alt={blog.title}
+                className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
+              />
+              <div className="absolute top-4 left-4">
+                <span className="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium shadow-sm">
                   {blog.category}
                 </span>
-                <span className="ml-2 text-sm text-gray-500">
-                  {moment(blog.publishedAt).format('MMMM D, YYYY')}
-                </span>
               </div>
-              <div className="text-sm text-gray-500">
+            </div>
+          )}
+
+          <div className="p-6 md:p-8">
+            <div className="flex flex-col sm:flex-row justify-between items-start mb-6 gap-4">
+              <div className="flex items-center text-sm text-gray-500">
+                <svg
+                  className="w-4 h-4 mr-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  ></path>
+                </svg>
+                {moment(blog.publishedAt).format("MMMM D, YYYY")}
+              </div>
+              <div className="flex items-center text-sm text-gray-500">
+                <svg
+                  className="w-4 h-4 mr-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                  ></path>
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                  ></path>
+                </svg>
                 {blog.views} views
               </div>
             </div>
-            
-            <h1 className="text-3xl font-bold text-primary mb-4">{blog.title}</h1>
-            
-            <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: blog.content }}></div>
-            
-            <div className="mt-6 flex items-center space-x-4">
-              {/* <button 
+
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6 leading-tight">
+              {blog.title}
+            </h1>
+
+            <div
+              className="prose max-w-none text-gray-700 mb-8"
+              dangerouslySetInnerHTML={{ __html: blog.content }}
+            ></div>
+
+            <div className="flex items-center space-x-4 mb-6">
+              <button
                 onClick={handleLike}
-                className="flex items-center text-green-600 hover:text-green-800"
+                className={`flex items-center px-4 py-2 rounded-lg transition-colors ${
+                  blog.isLiked
+                    ? "bg-green-100 text-green-700"
+                    : "bg-gray-100 text-gray-700 hover:bg-green-100 hover:text-green-700"
+                }`}
               >
-                <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"></path>
+                <svg
+                  className="w-5 h-5 mr-2"
+                  fill={blog.isLiked ? "currentColor" : "none"}
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"
+                  ></path>
                 </svg>
                 {blog.likes}
               </button>
-              
-              <button 
+
+              <button
                 onClick={handleDislike}
-                className="flex items-center text-red-600 hover:text-red-800"
+                className={`flex items-center px-4 py-2 rounded-lg transition-colors ${
+                  blog.isDisliked
+                    ? "bg-red-100 text-red-700"
+                    : "bg-gray-100 text-gray-700 hover:bg-red-100 hover:text-red-700"
+                }`}
               >
-                <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018c.163 0 .326.02.485.06L17 4m0 0v9m0-9h2.5a2 2 0 012 2v6a2 2 0 01-2 2H17m-7 0h2M17 20h2a2 2 0 002-2v-6a2 2 0 00-2-2h-2.5"></path>
+                <svg
+                  className="w-5 h-5 mr-2"
+                  fill={blog.isDisliked ? "currentColor" : "none"}
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018c.163 0 .326.02.485.06L17 4m0 0v9m0-9h2.5a2 2 0 012 2v6a2 2 0 01-2 2H17m-7 0h2M17 20h2a2 2 0 002-2v-6a2 2 0 00-2-2h-2.5"
+                  ></path>
                 </svg>
                 {blog.dislikes}
-              </button> */}
+              </button>
             </div>
-            
+
             {blog.tags && blog.tags.length > 0 && (
-              <div className="mt-6">
+              <div className="mb-6">
+                <h3 className="text-sm font-medium text-gray-500 mb-2">
+                  Tags:
+                </h3>
                 <div className="flex flex-wrap gap-2">
-                  {blog.tags.map(tag => (
-                    <span key={tag} className="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs">
+                  {blog.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm hover:bg-blue-100 hover:text-blue-800 transition-colors"
+                    >
                       #{tag}
                     </span>
                   ))}
                 </div>
               </div>
             )}
+
+            {/* Author Info */}
+            <div className="flex items-center pt-6 border-t border-gray-100">
+              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-800 font-bold mr-4">
+                {blog.author?.name
+                  ? blog.author.name.charAt(0).toUpperCase()
+                  : "A"}
+              </div>
+              <div>
+                <h4 className="font-medium text-gray-900">
+                  {blog.author?.name || "Anonymous"}
+                </h4>
+                <p className="text-sm text-gray-500">Blog Author</p>
+              </div>
+            </div>
           </div>
         </div>
-        
+
         {/* Comments Section */}
-        {/* <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-          <div className="bg-primary p-6">
-            <h3 className="text-xl font-bold text-white">Comments ({comments.length})</h3>
-          </div>
-          
-          <div className="p-6">
-            <form onSubmit={handleCommentSubmit} className="mb-8">
-              <div className="mb-4">
-                <label htmlFor="comment" className="block text-sm font-medium text-gray-700 mb-2">
-                  Add a comment
-                </label>
+        <div className="bg-white rounded-xl shadow-lg p-6 md:p-8">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">
+            Comments ({comments.length})
+          </h2>
+
+          {/* Comment Form */}
+          <form onSubmit={handleCommentSubmit} className="mb-8">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex-grow">
                 <textarea
-                  id="comment"
-                  rows="3"
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-accent focus:border-accent"
                   placeholder="Share your thoughts..."
-                ></textarea>
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                  rows="3"
+                />
               </div>
-              <button
-                type="submit"
-                disabled={isCommenting}
-                className="px-4 py-2 bg-accent text-white rounded-md hover:bg-orange-600 disabled:opacity-50"
-              >
-                {isCommenting ? 'Posting...' : 'Post Comment'}
-              </button>
-            </form>
-            
-            {comments.length === 0 ? (
-              <p className="text-gray-500 italic">No comments yet. Be the first to comment!</p>
-            ) : (
-              <div className="space-y-6">
-                {comments.map(comment => (
-                  <div key={comment._id} className="border-b border-gray-200 pb-4 last:border-0">
-                    <div className="flex justify-between items-start">
-                      <p className="text-gray-700">{comment.content}</p>
-                      <button 
-                        onClick={() => handleDeleteComment(comment._id)}
-                        className="text-red-500 hover:text-red-700"
-                        title="Delete comment"
+              <div className="sm:self-end">
+                <button
+                  type="submit"
+                  disabled={isCommenting || !comment.trim()}
+                  className="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-md"
+                >
+                  {isCommenting ? "Posting..." : "Post Comment"}
+                </button>
+              </div>
+            </div>
+          </form>
+
+          {/* Comments List */}
+          {comments.length > 0 ? (
+            <div className="space-y-6">
+              {comments.map((comment) => (
+                <div
+                  key={comment._id}
+                  className="border-b border-gray-100 pb-6 last:border-0 last:pb-0"
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <div className="flex items-center">
+                      <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-gray-700 font-bold mr-3">
+                        {comment.author?.name
+                          ? comment.author.name.charAt(0).toUpperCase()
+                          : "U"}
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-gray-900">
+                          {comment.author?.name || "User"}
+                        </h4>
+                        <p className="text-xs text-gray-500">
+                          {moment(comment.createdAt).fromNow()}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleDeleteComment(comment._id)}
+                      className="text-gray-400 hover:text-red-500 transition-colors"
+                    >
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
                       >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                        </svg>
-                      </button>
-                    </div>
-                    <div className="mt-2 flex items-center text-sm text-gray-500">
-                      <span>{moment(comment.createdAt).fromNow()}</span>
-                      <span className="mx-2">•</span>
-                      <button className="flex items-center hover:text-gray-700">
-                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"></path>
-                        </svg>
-                        {comment.likes || 0}
-                      </button>
-                    </div>
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                        ></path>
+                      </svg>
+                    </button>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div> */}
+                  <p className="text-gray-700 ml-13">{comment.content}</p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8">
+              <svg
+                className="w-16 h-16 text-gray-300 mx-auto mb-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                ></path>
+              </svg>
+              <p className="text-gray-500">
+                No comments yet. Be the first to share your thoughts!
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
