@@ -45,6 +45,8 @@ import AdminBlogList from "./pages/admin/blogs";
 import BlogDetail from "./pages/landingPage/BlogView";
 import InitiativeDetail from "./pages/landingPage/InitiativeDetails";
 import SettingsPage from "./pages/admin/settings";
+import EventRegister from "./pages/landingPage/EventRegister";
+import EventManagement from "./pages/admin/EventManagement";
 
 function App() {
   return (
@@ -69,6 +71,7 @@ function App() {
               <Route path="blogs" element={<AdminBlogList />} />
               <Route path="calendar" element={<CalendarPage />} />
               <Route path="settings" element={<SettingsPage />} />
+              <Route path="event-management" element={<EventManagement/>} />
 
               <Route path="orders/:orderId" element={<OrderView />} />
 
@@ -112,6 +115,7 @@ function App() {
               <Route path="/training" element={<TrainingHub />} />
               {/* <Route path="/initiatives" element={<InitiativesPage />}/> */}
               <Route path="/initiatives/:id" element={<InitiativeDetail />}/>
+              <Route path="/event-register" element={<EventRegister />} />
 
               <Route path="/assistive-tech" element={<AssistiveTechPage />} />
             </Route>

@@ -234,9 +234,11 @@ const CustomTextEditor = React.memo(
       // Check max length
       if (maxLength) {
         const textContent = content.replace(/<[^>]*>/g, "");
+        console.log(textContent)
         if (textContent.length > maxLength) {
           return;
         }
+
       }
 
       onChange?.(content);
