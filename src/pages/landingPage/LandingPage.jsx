@@ -8,6 +8,7 @@ import Hero from "../../components/user/Landing/Hero";
 import About from "../../components/user/Landing/About";
 import PartnersAndAwards from "../../components/user/Landing/PartnersAndAwards";
 import OurTeam from "../../components/user/Landing/Team";
+import EventLanding from "../../components/user/Landing/EventSection";
 
 
 const LandingPage = () => {
@@ -101,6 +102,7 @@ const LandingPage = () => {
       {/* <Navbar /> */}
       <Hero />
 
+<EventLanding />
       {/* why us */}
       <section id="why-us" className="bg-mutedSecondary text-primary flex flex-col items-center justify-center md:h-[70vh] p-16 w-full">
         <h2 className="text-3xl font-semibold mb-6">Why Choose Us?</h2>
