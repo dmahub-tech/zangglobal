@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:5000",
+  baseURL: "https://zangglobal-backend.onrender.com",
   headers: {
     "Content-Type": "application/json; charset=utf-8",
   },
@@ -9,13 +9,18 @@ const api = axios.create({
 
 export default api;
 
-export const  fetchProducts = async () => {
+export const fetchProducts = async () => {
   try {
     const response = await api.get("/products");
     return response.data;
   } catch (error) {
-    console.error("Error fetching products:", error?.response?.data || error.message);
-    throw new Error(error?.response?.data?.message || "Failed to fetch products");
+    console.error(
+      "Error fetching products:",
+      error?.response?.data || error.message
+    );
+    throw new Error(
+      error?.response?.data?.message || "Failed to fetch products"
+    );
   }
 };
 
