@@ -330,12 +330,12 @@ const BlogDetail = () => {
 
         {/* Comments Section */}
         <div className="bg-white rounded-xl shadow-lg p-6 md:p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">
+          {/* <h2 className="text-2xl font-bold text-gray-900 mb-6">
             Comments ({comments.length})
-          </h2>
+          </h2> */}
 
           {/* Comment Form */}
-          <form onSubmit={handleCommentSubmit} className="mb-8">
+          {/* <form onSubmit={handleCommentSubmit} className="mb-8">
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="flex-grow">
                 <textarea
@@ -356,10 +356,9 @@ const BlogDetail = () => {
                 </button>
               </div>
             </div>
-          </form>
+          </form> */}
 
-          {/* Comments List */}
-          {comments.length > 0 ? (
+          {/* {comments.length > 0 ? (
             <div className="space-y-6">
               {comments.map((comment) => (
                 <div
@@ -424,7 +423,7 @@ const BlogDetail = () => {
                 No comments yet. Be the first to share your thoughts!
               </p>
             </div>
-          )}
+          )} */}
         </div>
       </div>
     </div>
