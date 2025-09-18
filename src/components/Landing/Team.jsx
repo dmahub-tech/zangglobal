@@ -1,5 +1,5 @@
 import React from "react";
-import {teamMembers} from "../../../constants"
+import {teamMembers} from "../../constants"
 
 
 function OurTeam() {

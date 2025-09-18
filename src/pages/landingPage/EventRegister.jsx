@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Calendar, MapPin, Building, User, Mail, Phone, Globe, Users, Monitor, CheckCircle, Sparkles, ArrowRight, Star } from "lucide-react";
+import api from "../../config/api";
 
 function EventRegister() {
   const [formData, setFormData] = useState({
@@ -65,7 +66,10 @@ function EventRegister() {
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 2000));
-      console.log("Registration successful:", formData);
+
+      const response = await api.post("/attendance", formData);
+
+      console.log("Registration successful:", response.data);
       setIsSuccess(true);
 
       setFormData({
@@ -194,7 +198,7 @@ function EventRegister() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
             <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6 text-center group hover:border-secondary/30 transition-all duration-300">
               <Calendar className="h-8 w-8 text-secondary mx-auto mb-3 group-hover:scale-110 transition-transform" />
-              <h3 className="font-bold text-white mb-1">October 2, 2025</h3>
+              <h3 className="font-bold text-white mb-1">Nov 2, 2025</h3>
               <p className="text-mutedSecondary text-sm">10:00 AM - 6:00 PM</p>
             </div>
             <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6 text-center group hover:border-accent/30 transition-all duration-300">

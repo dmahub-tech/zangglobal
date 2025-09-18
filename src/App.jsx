@@ -47,6 +47,8 @@ import InitiativeDetail from "./pages/landingPage/InitiativeDetails";
 import SettingsPage from "./pages/admin/settings";
 import EventRegister from "./pages/landingPage/EventRegister";
 import EventManagement from "./pages/admin/EventManagement";
+import VolunteerRegistration from "./pages/landingPage/volunteer";
+import VolunteersAdmin from "./pages/admin/volunteers";
 
 function App() {
   return (
@@ -65,6 +67,7 @@ function App() {
             >
               <Route path="" element={<DashboardPage />} />
               <Route path="products" element={<Product />} />
+              <Route path="volunteer-management" element={<VolunteersAdmin />} /> 
               <Route path="orders" element={<Orders />} />
               <Route path="customers" element={<Customers />} />
               <Route path="reviews" element={<Reviews />} />
@@ -116,7 +119,7 @@ function App() {
               {/* <Route path="/initiatives" element={<InitiativesPage />}/> */}
               <Route path="/initiatives/:id" element={<InitiativeDetail />}/>
               <Route path="/event-register" element={<EventRegister />} />
-
+              <Route path="volunteer-registration" element={<VolunteerRegistration />}/>
               <Route path="/assistive-tech" element={<AssistiveTechPage />} />
             </Route>
 

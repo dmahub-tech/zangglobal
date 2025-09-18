@@ -1,5 +1,5 @@
 import React from "react";
-import { partnerAwardData } from "../../../constants";
+import { partnerAwardData } from "../../constants";
 
 const PartnersAndAwards = () => {
   return (

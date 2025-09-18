@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { FiMenu, FiX, FiChevronDown, FiChevronUp } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
-import logo from "../../../assets/images/logoYellow.png";
+import logo from "../../assets/images/logoYellow.png";
 import { X } from "lucide-react";
 
 // Navigation structure

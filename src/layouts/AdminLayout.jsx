@@ -24,7 +24,7 @@ import { createProduct } from "../redux/slice/productSlice";
 import { toast } from "react-toastify";
 import { useAdminAuth } from "../context/Admin";
 import ProtectedRoute from "../components/protectedRoute";
-import { FaCalendarCheck } from "react-icons/fa";
+import { FaCalendarCheck, FaUsersCog } from "react-icons/fa";
 
 const AdminLayout = ({ children, adminOnly = false }) => {
   const navigate = useNavigate();
@@ -85,6 +85,11 @@ const AdminLayout = ({ children, adminOnly = false }) => {
       name: "Events",
       icon: <FaCalendarCheck className="w-5 h-5" />,
       path: `/admin/event-management/`,
+    },
+    {
+      name: "Volunteers",
+      icon: <FaUsersCog className="w-5 h-5" />,
+      path: `/admin/volunteer-management/`,
     },
     {
       name: "Blogs",

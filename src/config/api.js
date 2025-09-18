@@ -1,7 +1,8 @@
 import axios from "axios";
-
 const api = axios.create({
-  baseURL: "https://zangglobal-backend.onrender.com",
+  // baseURL: "https://zangglobal-backend.onrender.com",
+  baseURL: "http://localhost:5000",
+
   headers: {
     "Content-Type": "application/json; charset=utf-8",
   },

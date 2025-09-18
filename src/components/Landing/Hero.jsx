@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
-import sampleImg from "../../../assets/images/zang.jpg";
-import backgroundimage from "../../../assets/images/Home.jpg";
+import sampleImg from "../../assets/images/zang.jpg";
+import backgroundimage from "../../assets/images/Home.jpg";
 import React, { useState, useEffect } from "react";
 import { TypeAnimation } from "react-type-animation";
 

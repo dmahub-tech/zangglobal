@@ -25,7 +25,7 @@ const EventLanding = () => {
   const [hoveredCard, setHoveredCard] = useState(null);
 
   useEffect(() => {
-    const countDownDate = new Date("Oct 2, 2025 10:00:00").getTime();
+    const countDownDate = new Date("Nov 2, 2025 10:00:00").getTime();
 
     const timer = setInterval(() => {
       const now = new Date().getTime();
@@ -185,7 +185,7 @@ const EventLanding = () => {
               </div>
               <div>
                 <h3 className="text-lg font-bold text-secondary">
-                  October 2, 2025
+                  November 2, 2025
                 </h3>
                 <p className="text-mutedSecondary">10:00 AM - 6:00 PM</p>
               </div>
