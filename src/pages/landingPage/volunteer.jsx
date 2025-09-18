@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import api from "../../config/api";
 
 const VolunteerRegistration = () => {
@@ -19,13 +19,159 @@ const VolunteerRegistration = () => {
     emergencyContact: "",
   });
 
+  const [errors, setErrors] = useState({});
+  const [touched, setTouched] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
+  // Validation rules
+  const validationRules = {
+    fullName: {
+      required: true,
+      minLength: 2,
+      maxLength: 100,
+      pattern: /^[a-zA-Z\s'-]+$/,
+    },
+    email: {
+      required: true,
+      pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+    },
+    phone: {
+      required: false,
+      pattern: /^[\+]?[0-9\s\-\(\)]{10,}$/,
+    },
+    whatsapp: {
+      required: true,
+      pattern: /^[\+]?[0-9\s\-\(\)]{10,}$/,
+    },
+    residence: {
+      required: true,
+      minLength: 2,
+      maxLength: 100,
+    },
+    ageRange: {
+      required: true,
+    },
+    roles: {
+      required: true,
+      minItems: 1,
+    },
+    availability: {
+      required: true,
+    },
+    emergencyContact: {
+      required: true,
+      minLength: 5,
+      maxLength: 200,
+    },
+  };
+
+  // Validation messages
+  const validationMessages = {
+    fullName: {
+      required: "Full name is required",
+      minLength: "Name must be at least 2 characters long",
+      maxLength: "Name cannot exceed 100 characters",
+      pattern:
+        "Name can only contain letters, spaces, hyphens, and apostrophes",
+    },
+    email: {
+      required: "Email address is required",
+      pattern: "Please enter a valid email address",
+    },
+    phone: {
+      pattern: "Please enter a valid phone number",
+    },
+    whatsapp: {
+      required: "WhatsApp number is required",
+      pattern: "Please enter a valid WhatsApp number",
+    },
+    residence: {
+      required: "City & State of residence is required",
+      minLength: "Residence must be at least 2 characters long",
+      maxLength: "Residence cannot exceed 100 characters",
+    },
+    ageRange: {
+      required: "Please select your age range",
+    },
+    roles: {
+      required: "Please select at least one volunteer role",
+      minItems: "Please select at least one volunteer role",
+    },
+    availability: {
+      required: "Please select your availability",
+    },
+    emergencyContact: {
+      required: "Emergency contact information is required",
+      minLength: "Emergency contact must be at least 5 characters long",
+      maxLength: "Emergency contact cannot exceed 200 characters",
+    },
+  };
+
+  // Validate individual field
+  const validateField = (name, value) => {
+    const rules = validationRules[name];
+    if (!rules) return "";
+
+    // Handle array fields (roles)
+    if (name === "roles") {
+      if (rules.required && (!value || value.length === 0)) {
+        return validationMessages[name].required;
+      }
+      if (rules.minItems && value.length < rules.minItems) {
+        return validationMessages[name].minItems;
+      }
+      return "";
+    }
+
+    // Required validation
+    if (rules.required && (!value || value.toString().trim() === "")) {
+      return validationMessages[name].required;
+    }
+
+    // Skip other validations if field is empty and not required
+    if (!rules.required && (!value || value.toString().trim() === "")) {
+      return "";
+    }
+
+    // Min length validation
+    if (rules.minLength && value.length < rules.minLength) {
+      return validationMessages[name].minLength;
+    }
+
+    // Max length validation
+    if (rules.maxLength && value.length > rules.maxLength) {
+      return validationMessages[name].maxLength;
+    }
+
+    // Pattern validation
+    if (rules.pattern && !rules.pattern.test(value)) {
+      return validationMessages[name].pattern;
+    }
+
+    return "";
+  };
+
+  // Validate entire form
+  const validateForm = () => {
+    const newErrors = {};
+
+    Object.keys(validationRules).forEach((fieldName) => {
+      const error = validateField(fieldName, formData[fieldName]);
+      if (error) {
+        newErrors[fieldName] = error;
+      }
+    });
+
+    return newErrors;
+  };
+
+  // Handle input change with validation
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
 
     if (type === "checkbox") {
-      // Handle multiple selections for volunteer roles
       const updatedRoles = checked
         ? [...formData.roles, value]
         : formData.roles.filter((role) => role !== value);
@@ -34,26 +180,120 @@ const VolunteerRegistration = () => {
         ...prevData,
         [name]: updatedRoles,
       }));
+
+      // Validate roles
+      if (touched[name]) {
+        const error = validateField(name, updatedRoles);
+        setErrors((prev) => ({
+          ...prev,
+          [name]: error,
+        }));
+      }
     } else {
       setFormData((prevData) => ({
         ...prevData,
         [name]: value,
       }));
+
+      // Real-time validation for touched fields
+      if (touched[name]) {
+        const error = validateField(name, value);
+        setErrors((prev) => ({
+          ...prev,
+          [name]: error,
+        }));
+      }
+    }
+
+    // Clear submit error when user starts typing
+    if (submitError) {
+      setSubmitError("");
     }
   };
 
+  // Handle field blur (when user leaves field)
+  const handleBlur = (e) => {
+    const { name } = e.target;
+
+    setTouched((prev) => ({
+      ...prev,
+      [name]: true,
+    }));
+
+    // Validate field on blur
+    const error = validateField(name, formData[name]);
+    setErrors((prev) => ({
+      ...prev,
+      [name]: error,
+    }));
+  };
+
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
+    setSubmitError("");
 
-    try{
-          const response = await api.post("/volunteer", formData);
-    }catch(err){
-      console.log(err)
+    // Mark all fields as touched
+    const allTouched = {};
+    Object.keys(validationRules).forEach((key) => {
+      allTouched[key] = true;
+    });
+    setTouched(allTouched);
+
+    // Validate entire form
+    const formErrors = validateForm();
+    setErrors(formErrors);
+
+    // If there are validation errors, don't submit
+    if (Object.keys(formErrors).length > 0) {
+      setIsSubmitting(false);
+      setSubmitError("Please fix the errors above before submitting.");
+
+      // Focus on first error field
+      const firstErrorField = Object.keys(formErrors)[0];
+      const errorElement = document.getElementById(firstErrorField);
+      if (errorElement) {
+        errorElement.scrollIntoView({ behavior: "smooth", block: "center" });
+        errorElement.focus();
+      }
+
+      return;
     }
-    
-    // In a real application, you would send this data to your backend
-    console.log("Volunteer form data:", formData);
-    setSubmitted(true);
+
+    try {
+      const response = await api.post("/volunteer", formData);
+      console.log("Volunteer form submitted successfully:", response);
+      setSubmitted(true);
+    } catch (err) {
+      console.error("Error submitting form:", err);
+      setSubmitError(
+        err.response?.data?.message ||
+          "An error occurred while submitting your application. Please try again."
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Get field className based on validation state
+  const getFieldClassName = (fieldName, baseClass) => {
+    const hasError = touched[fieldName] && errors[fieldName];
+    const isValid =
+      touched[fieldName] && !errors[fieldName] && formData[fieldName];
+
+    let className = baseClass;
+
+    if (hasError) {
+      className += " border-red-500 focus:border-red-500 focus:ring-red-500";
+    } else if (isValid) {
+      className +=
+        " border-green-500 focus:border-green-500 focus:ring-green-500";
+    } else {
+      className += " border-gray-300 focus:border-primary focus:ring-primary";
+    }
+
+    return className;
   };
 
   if (submitted) {
@@ -114,7 +354,26 @@ const VolunteerRegistration = () => {
 
         {/* Form Section */}
         <div className="bg-mutedSecondary rounded-xl shadow-lg p-6 md:p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
+          {submitError && (
+            <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-md">
+              <div className="flex items-center">
+                <svg
+                  className="w-5 h-5 mr-2"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                {submitError}
+              </div>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-6" noValidate>
             {/* Full Name */}
             <div>
               <label
@@ -129,10 +388,35 @@ const VolunteerRegistration = () => {
                 name="fullName"
                 value={formData.fullName}
                 onChange={handleChange}
-                required
-                className="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 p-3 text-gray-800"
+                onBlur={handleBlur}
+                className={getFieldClassName(
+                  "fullName",
+                  "w-full rounded-md shadow-sm focus:ring focus:ring-opacity-50 p-3 text-gray-800"
+                )}
                 placeholder="Enter your full name"
+                aria-describedby={
+                  errors.fullName ? "fullName-error" : undefined
+                }
               />
+              {touched.fullName && errors.fullName && (
+                <p
+                  id="fullName-error"
+                  className="mt-1 text-sm text-red-600 flex items-center"
+                >
+                  <svg
+                    className="w-4 h-4 mr-1"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  {errors.fullName}
+                </p>
+              )}
             </div>
 
             {/* Email */}
@@ -149,10 +433,33 @@ const VolunteerRegistration = () => {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                required
-                className="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 p-3 text-gray-800"
+                onBlur={handleBlur}
+                className={getFieldClassName(
+                  "email",
+                  "w-full rounded-md shadow-sm focus:ring focus:ring-opacity-50 p-3 text-gray-800"
+                )}
                 placeholder="Enter your email address"
+                aria-describedby={errors.email ? "email-error" : undefined}
               />
+              {touched.email && errors.email && (
+                <p
+                  id="email-error"
+                  className="mt-1 text-sm text-red-600 flex items-center"
+                >
+                  <svg
+                    className="w-4 h-4 mr-1"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  {errors.email}
+                </p>
+              )}
             </div>
 
             {/* Phone and WhatsApp */}
@@ -170,9 +477,33 @@ const VolunteerRegistration = () => {
                   name="phone"
                   value={formData.phone}
                   onChange={handleChange}
-                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 p-3 text-gray-800"
+                  onBlur={handleBlur}
+                  className={getFieldClassName(
+                    "phone",
+                    "w-full rounded-md shadow-sm focus:ring focus:ring-opacity-50 p-3 text-gray-800"
+                  )}
                   placeholder="Your phone number"
+                  aria-describedby={errors.phone ? "phone-error" : undefined}
                 />
+                {touched.phone && errors.phone && (
+                  <p
+                    id="phone-error"
+                    className="mt-1 text-sm text-red-600 flex items-center"
+                  >
+                    <svg
+                      className="w-4 h-4 mr-1"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    {errors.phone}
+                  </p>
+                )}
               </div>
               <div>
                 <label
@@ -187,10 +518,35 @@ const VolunteerRegistration = () => {
                   name="whatsapp"
                   value={formData.whatsapp}
                   onChange={handleChange}
-                  required
-                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 p-3 text-gray-800"
+                  onBlur={handleBlur}
+                  className={getFieldClassName(
+                    "whatsapp",
+                    "w-full rounded-md shadow-sm focus:ring focus:ring-opacity-50 p-3 text-gray-800"
+                  )}
                   placeholder="Your WhatsApp number"
+                  aria-describedby={
+                    errors.whatsapp ? "whatsapp-error" : undefined
+                  }
                 />
+                {touched.whatsapp && errors.whatsapp && (
+                  <p
+                    id="whatsapp-error"
+                    className="mt-1 text-sm text-red-600 flex items-center"
+                  >
+                    <svg
+                      className="w-4 h-4 mr-1"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    {errors.whatsapp}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -208,10 +564,35 @@ const VolunteerRegistration = () => {
                 name="residence"
                 value={formData.residence}
                 onChange={handleChange}
-                required
-                className="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 p-3 text-gray-800"
+                onBlur={handleBlur}
+                className={getFieldClassName(
+                  "residence",
+                  "w-full rounded-md shadow-sm focus:ring focus:ring-opacity-50 p-3 text-gray-800"
+                )}
                 placeholder="e.g., Jos, Plateau State"
+                aria-describedby={
+                  errors.residence ? "residence-error" : undefined
+                }
               />
+              {touched.residence && errors.residence && (
+                <p
+                  id="residence-error"
+                  className="mt-1 text-sm text-red-600 flex items-center"
+                >
+                  <svg
+                    className="w-4 h-4 mr-1"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  {errors.residence}
+                </p>
+              )}
             </div>
 
             {/* Age Range */}
@@ -229,7 +610,7 @@ const VolunteerRegistration = () => {
                       value={range}
                       checked={formData.ageRange === range}
                       onChange={handleChange}
-                      required
+                      onBlur={handleBlur}
                       className="focus:ring-primary h-4 w-4 text-primary border-gray-300"
                     />
                     <label
@@ -241,6 +622,22 @@ const VolunteerRegistration = () => {
                   </div>
                 ))}
               </div>
+              {touched.ageRange && errors.ageRange && (
+                <p className="mt-1 text-sm text-red-600 flex items-center">
+                  <svg
+                    className="w-4 h-4 mr-1"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  {errors.ageRange}
+                </p>
+              )}
             </div>
 
             {/* Occupation */}
@@ -257,6 +654,7 @@ const VolunteerRegistration = () => {
                 name="occupation"
                 value={formData.occupation}
                 onChange={handleChange}
+                onBlur={handleBlur}
                 className="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 p-3 text-gray-800"
                 placeholder="What do you do?"
               />
@@ -265,7 +663,7 @@ const VolunteerRegistration = () => {
             {/* Preferred Volunteer Roles */}
             <div>
               <label className="block text-sm font-medium text-primary mb-2">
-                Preferred Volunteer Role(s) (select one or more)
+                Preferred Volunteer Role(s) (select one or more) *
               </label>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {[
@@ -292,6 +690,7 @@ const VolunteerRegistration = () => {
                       value={role}
                       checked={formData.roles.includes(role)}
                       onChange={handleChange}
+                      onBlur={handleBlur}
                       className="focus:ring-primary h-4 w-4 text-primary border-gray-300 rounded mt-1"
                     />
                     <label
@@ -303,6 +702,22 @@ const VolunteerRegistration = () => {
                   </div>
                 ))}
               </div>
+              {touched.roles && errors.roles && (
+                <p className="mt-2 text-sm text-red-600 flex items-center">
+                  <svg
+                    className="w-4 h-4 mr-1"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  {errors.roles}
+                </p>
+              )}
             </div>
 
             {/* Motivation */}
@@ -318,6 +733,7 @@ const VolunteerRegistration = () => {
                 name="motivation"
                 value={formData.motivation}
                 onChange={handleChange}
+                onBlur={handleBlur}
                 rows={3}
                 className="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 p-3 text-gray-800"
                 placeholder="Share your motivation for volunteering..."
@@ -396,7 +812,7 @@ const VolunteerRegistration = () => {
                       value={option}
                       checked={formData.availability === option}
                       onChange={handleChange}
-                      required
+                      onBlur={handleBlur}
                       className="focus:ring-primary h-4 w-4 text-primary border-gray-300"
                     />
                     <label
@@ -408,6 +824,22 @@ const VolunteerRegistration = () => {
                   </div>
                 ))}
               </div>
+              {touched.availability && errors.availability && (
+                <p className="mt-1 text-sm text-red-600 flex items-center">
+                  <svg
+                    className="w-4 h-4 mr-1"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  {errors.availability}
+                </p>
+              )}
             </div>
 
             {/* T-shirt Size */}
@@ -448,19 +880,71 @@ const VolunteerRegistration = () => {
                 name="emergencyContact"
                 value={formData.emergencyContact}
                 onChange={handleChange}
-                required
-                className="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50 p-3 text-gray-800"
+                onBlur={handleBlur}
+                className={getFieldClassName(
+                  "emergencyContact",
+                  "w-full rounded-md shadow-sm focus:ring focus:ring-opacity-50 p-3 text-gray-800"
+                )}
                 placeholder="Name and phone number of emergency contact"
+                aria-describedby={
+                  errors.emergencyContact ? "emergencyContact-error" : undefined
+                }
               />
+              {touched.emergencyContact && errors.emergencyContact && (
+                <p
+                  id="emergencyContact-error"
+                  className="mt-1 text-sm text-red-600 flex items-center"
+                >
+                  <svg
+                    className="w-4 h-4 mr-1"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  {errors.emergencyContact}
+                </p>
+              )}
             </div>
 
             {/* Submit Button */}
             <div className="pt-4">
               <button
                 type="submit"
-                className="w-full py-3 px-4 bg-primary hover:bg-mutedPrimary text-white font-semibold rounded-lg shadow-md transition-colors duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+                disabled={isSubmitting}
+                className="w-full py-3 px-4 bg-primary hover:bg-mutedPrimary disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold rounded-lg shadow-md transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary flex items-center justify-center"
               >
-                Apply to Volunteer
+                {isSubmitting ? (
+                  <>
+                    <svg
+                      className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    Submitting...
+                  </>
+                ) : (
+                  "Apply to Volunteer"
+                )}
               </button>
             </div>
           </form>
