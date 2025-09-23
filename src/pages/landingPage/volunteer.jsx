@@ -340,7 +340,7 @@ const VolunteerRegistration = () => {
             Join Our Volunteer Team
           </h1>
           <p className="text-xl text-mutedSecondary mb-6">
-            Product Launch, Exhibition & Fundraising - October 26th, 2025
+            Product Launch, Exhibition & Fundraising - November 2nd, 2025
           </p>
           <div className="bg-mutedSecondary bg-opacity-20 rounded-lg p-6">
             <p className="text-mutedSecondary">
@@ -800,8 +800,8 @@ const VolunteerRegistration = () => {
               </label>
               <div className="space-y-2">
                 {[
-                  "Full-day on October 26th",
-                  "Partial-day on October 26th",
+                  "Full-day on November 2nd",
+                  "Partial-day on November 2nd",
                   "Available before and during the event",
                 ].map((option) => (
                   <div key={option} className="flex items-center">

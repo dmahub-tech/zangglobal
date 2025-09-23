@@ -861,11 +861,11 @@ const VolunteersAdmin = () => {
                       className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                     >
                       <option value="">Select availability</option>
-                      <option value="Full-day on October 26th">
-                        Full-day on October 26th
+                      <option value="Full-day on November 2nd">
+                        Full-day on November 2nd
                       </option>
-                      <option value="Partial-day on October 26th">
-                        Partial-day on October 26th
+                      <option value="Partial-day on November 2nd">
+                        Partial-day on November 2nd
                       </option>
                       <option value="Available before and during the event">
                         Available before and during the event

@@ -117,7 +117,7 @@ const EventLanding = () => {
             <div className="inline-flex items-center px-6 py-3 bg-primary rounded-full mb-8 shadow-2xl border border-mutedPrimary/30 backdrop-blur-sm">
               <Star className="w-4 h-4 mr-2 text-secondary" />
               <span className="text-sm font-bold tracking-wider text-white uppercase">
-                Exclusive Launch Event • Oct 2, 2025
+                Exclusive Launch Event • Nov 2, 2025
               </span>
               <Zap className="w-4 h-4 ml-2 text-secondary" />
             </div>

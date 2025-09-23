@@ -183,7 +183,7 @@ const VolunteerSection = () => {
                   <p className="text-gray-800 mb-6">
                     We're looking for enthusiastic individuals to join our
                     volunteer team for the Zang Global Product Launch,
-                    Exhibition & Fundraising event on October 26th, 2025 in Jos.
+                    Exhibition & Fundraising event on November 2nd, 2025 in Jos.
                   </p>
 
                   <div className="mb-6">
@@ -192,7 +192,7 @@ const VolunteerSection = () => {
                     </h4>
                     <ul className="list-disc pl-5 text-gray-800 space-y-1">
                       <li>Minimum age: 18 years</li>
-                      <li>Availability on event day (October 26th, 2025)</li>
+                      <li>Availability on event day (November 2nd, 2025)</li>
                       <li>Good communication skills</li>
                       <li>Positive attitude and team spirit</li>
                       <li>Commitment to assigned shifts</li>
