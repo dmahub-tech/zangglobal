@@ -49,6 +49,7 @@ import EventRegister from "./pages/landingPage/EventRegister";
 import EventManagement from "./pages/admin/EventManagement";
 import VolunteerRegistration from "./pages/landingPage/volunteer";
 import VolunteersAdmin from "./pages/admin/volunteers";
+import ScrollToTop from "./components/SscrollToTop";
 
 function App() {
   return (
@@ -56,6 +57,7 @@ function App() {
       <Provider store={store}>
         <ToastContainer />
         <BrowserRouter>
+        <ScrollToTop />
           <Routes>
             <Route
               path="/admin/"
