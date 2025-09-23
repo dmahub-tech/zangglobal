@@ -170,7 +170,7 @@ const EventLanding = () => {
               </div>
 
             </div>
-              <Link className="bg-secondary text-primary  px-5 rounded-full font-semibold py-3" to={"/event-register"}>Regiseter Now! </Link>
+              <Link className="bg-secondary text-primary  px-5 rounded-full font-semibold py-3" to={"/event-register"}>Register Now! </Link>
           </div>
         </div>
       </div>
