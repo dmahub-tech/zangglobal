@@ -342,56 +342,7 @@ const VolunteerSection = () => {
           </div>
         </div>
 
-        {/* Testimonials from Past Volunteers */}
-        <div className="mt-16">
-          <h3 className="text-2xl font-semibold text-secondary text-center mb-8">
-            What Our Volunteers Say
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              {
-                name: "Chioma A.",
-                role: "Event Logistics Volunteer",
-                text: "Volunteering with Zang Global was transformative! I gained practical event management experience and made valuable connections that helped launch my career.",
-                avatar: "CA",
-              },
-              {
-                name: "Tunde M.",
-                role: "Guest Registration Team",
-                text: "The training was comprehensive, and the team was incredibly supportive. It felt amazing to be part of such an impactful event in our community.",
-                avatar: "TM",
-              },
-              {
-                name: "Amina J.",
-                role: "Social Media Volunteer",
-                text: "I loved every moment! The energy was electric, and I appreciated how our contributions were recognized and valued by the entire organization.",
-                avatar: "AJ",
-              },
-            ].map((testimonial, index) => (
-              <div
-                key={index}
-                className="bg-mutedSecondary bg-opacity-10 backdrop-blur-sm rounded-xl p-6"
-              >
-                <div className="flex items-center mb-4">
-                  <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white font-semibold mr-3">
-                    {testimonial.avatar}
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-secondary">
-                      {testimonial.name}
-                    </h4>
-                    <p className="text-sm text-mutedSecondary">
-                      {testimonial.role}
-                    </p>
-                  </div>
-                </div>
-                <p className="text-mutedSecondary italic">
-                  "{testimonial.text}"
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
+       
       </div>
     </section>
   );

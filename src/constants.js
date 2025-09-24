@@ -13,6 +13,10 @@ import future from "./assets/images/partners/future.png";
 import inovative from "./assets/images/partners/MostInnovativeTech.png";
 import msme from "./assets/images/partners/MSME.jpg";
 
+import meshak from "../public/meshak.jpeg"
+import benny from "../public/benny.jpeg"
+import  idoko from "../public/idoko.jpeg"
+
 import sarah from "./assets/images/teams/sarah.png"
 import friday from "./assets/images/teams/friday.png"
 import vivian from "./assets/images/teams/vivian.png"
@@ -64,90 +68,27 @@ export const progress = [
 
 
 export const testimonialData = [
-    {
-        img: image,
-        name: "Ralph Edwards",
-        statement:
-            "Odio rhoncus ornare ut quam. Molestie vel duis quis scelerisque ut id. In tortor turpis viverra sagittis ultrices nisi, nec tortor. Vestibulum, ultrices ultricies neque, hac ultricies dolor",
-        services: "Math Teacher",
-    },
-    {
-        img: image,
-        name: "Alice Smith",
-        statement:
-            "Sagittis nunc egestas leo et malesuada urna risus. Morbi proin et cras aliquam. Diam tellus, amet, hac imperdiet. Tellus mi volutpat tellus, congue malesuada sit nisl donec a",
-        services: "Manager",
-    },
-    {
-        img: image,
-        name: "John Joy",
-        statement:
-            "Odio rhoncus ornare ut quam. Molestie vel duis quis scelerisque ut id. In tortor turpis viverra sagittis ultrices nisi, nec tortor. Vestibulum, ultrices ultricies neque, hac ultricies dolor",
-        services: "Psychology Student",
-    },
-    {
-        img: image,
-        name: "Alice idris",
-        statement:
-            "Sagittis nunc egestas leo et malesuada urna risus. Morbi proin et cras aliquam. Diam tellus, amet, hac imperdiet. Tellus mi volutpat tellus, congue malesuada sit nisl donec a",
-        services: "Frontend Dev",
-    },
-    {
-        img: image,
-        name: "Ayuba Alanin",
-        statement:
-            "Odio rhoncus ornare ut quam. Molestie vel duis quis scelerisque ut id. In tortor turpis viverra sagittis ultrices nisi, nec tortor. Vestibulum, ultrices ultricies neque, hac ultricies dolor",
-        services: "Psychologist",
-    },
-    {
-        img: image,
-        name: "Olaide idris",
-        statement:
-            "Sapien, sollicitudin et vitae id et laoreet sapien consectetur. Felis egestas egestas amet aliquam sit euismod. Pellentesque neque, sed ut volutpat. Ullamcorper in at nulla dignissim",
-        services: "Manager",
-    },
-    {
-        img: image,
-        name: "Akande Abiodun",
-        statement:
-            "Sagittis nunc egestas leo et malesuada urna risus. Morbi proin et cras aliquam. Diam tellus, amet, hac imperdiet. Tellus mi volutpat tellus, congue malesuada sit nisl donec a",
-        services: "Lawyer",
-    },
-    {
-        img: image,
-        name: "Azeezat Smith",
-        statement:
-            "Sapien, sollicitudin et vitae id et laoreet sapien consectetur. Felis egestas egestas amet aliquam sit euismod. Pellentesque neque, sed ut volutpat. Ullamcorper in at nulla dignissim",
-        services: "Backend Dev",
-    },
-    {
-        img: image,
-        name: "John sofiyah",
-        statement:
-            "Odio rhoncus ornare ut quam. Molestie vel duis quis scelerisque ut id. In tortor turpis viverra sagittis ultrices nisi, nec tortor. Vestibulum, ultrices ultricies neque, hac ultricies dolor",
-        services: "Accountant",
-    },
-    {
-        img: image,
-        name: "Idris Olaide",
-        statement:
-            "Sagittis nunc egestas leo et malesuada urna risus. Morbi proin et cras aliquam. Diam tellus, amet, hac imperdiet. Tellus mi volutpat tellus, congue malesuada sit nisl donec a",
-        services: "Doctor",
-    },
-    {
-        img: image,
-        name: "Adewale Usman",
-        statement:
-            "Sapien, Sagittis nunc egestas leo et malesuada urna risus. Morbi proin et cras aliquam. Diam tellus, amet, hac imperdiet. Tellus mi volutpat tellus, congue malesuada sit nisl donec a.id et laoreet sapien consectetur. Felis egestas egestas amet aliquam sit euismod. Pellentesque neque, sed ut volutpat. Ullamcorper in at nulla dignissim",
-        services: "Manager",
-    },
-    {
-        img: image,
-        name: "Alice Smith",
-        statement:
-            "Sagittis nunc egestas leo et malesuada urna risus. Morbi proin et cras aliquam. Diam tellus, amet, hac imperdiet. Tellus mi volutpat tellus, congue malesuada sit nisl donec a",
-        services: "Manager",
-    },
+  {
+    img: meshak,
+    name: "Mr. Meshak Chetle ",
+    statement:
+      "The Zang USB and Powerbank provide reliable performance and exceptional durability, making them indispensable for both office and field operations.",
+    services: "MD/CEO Prominent Biiman Technologies Limited",
+  },
+  {
+    img: benny,
+    name: "Benny",
+    statement:
+      " I have used the renowned indigenous Zang Global Power Bank for the past three years, and the experience has been outstanding, consistent performance and full capacity every time. I highly recommend it to anyone.",
+    services: "Customer",
+  },
+  {
+    img: idoko,
+    name: "Idoko Negedu",
+    statement:
+      "Discovering the Zang brand and using their products over the past two years has completely reshaped my view of Nigerian-made innovations. For quality, reliability, durability, affordability, and exceptional customer service, Zang Global truly delivers. I recommend their products with complete confidence—100% guaranteed.",
+    services: "Customer",
+  },
 ];
 
 

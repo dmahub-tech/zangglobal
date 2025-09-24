@@ -187,7 +187,7 @@ const EventLanding = () => {
                 <h3 className="text-lg font-bold text-secondary">
                   November 2, 2025
                 </h3>
-                <p className="text-mutedSecondary">10:00 AM - 6:00 PM</p>
+                <p className="text-mutedSecondary">2:00 PM</p>
               </div>
             </div>
 
