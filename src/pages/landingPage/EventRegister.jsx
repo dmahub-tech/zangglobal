@@ -199,7 +199,7 @@ function EventRegister() {
             <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6 text-center group hover:border-secondary/30 transition-all duration-300">
               <Calendar className="h-8 w-8 text-secondary mx-auto mb-3 group-hover:scale-110 transition-transform" />
               <h3 className="font-bold text-white mb-1">Nov 2, 2025</h3>
-              <p className="text-mutedSecondary text-sm">10:00 AM - 6:00 PM</p>
+              <p className="text-mutedSecondary text-sm">2:00 PM</p>
             </div>
             <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-6 text-center group hover:border-accent/30 transition-all duration-300">
               <MapPin className="h-8 w-8 text-accent mx-auto mb-3 group-hover:scale-110 transition-transform" />
@@ -375,7 +375,6 @@ function EventRegister() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {[
                       "Guest / Attendee",
-                      "Exhibitor",
                       "Sponsor / Partner",
                       "Media Representative",
                     ].map((option) => (
