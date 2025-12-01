@@ -49,7 +49,9 @@ import EventRegister from "./pages/landingPage/EventRegister";
 import EventManagement from "./pages/admin/EventManagement";
 import VolunteerRegistration from "./pages/landingPage/volunteer";
 import VolunteersAdmin from "./pages/admin/volunteers";
+import GalleryManagement from "./pages/admin/gallery";
 import ScrollToTop from "./components/SscrollToTop";
+import GalleryPage from "./pages/landingPage/Gallery";
 
 function App() {
   return (
@@ -74,6 +76,7 @@ function App() {
               <Route path="customers" element={<Customers />} />
               <Route path="reviews" element={<Reviews />} />
               <Route path="blogs" element={<AdminBlogList />} />
+              <Route path="gallery" element={<GalleryManagement />} />
               <Route path="calendar" element={<CalendarPage />} />
               <Route path="settings" element={<SettingsPage />} />
               <Route path="event-management" element={<EventManagement/>} />
@@ -118,7 +121,7 @@ function App() {
               <Route path="/blogs" element={<Blogs />} />
               <Route path="/blogs/:id" element={<BlogDetail />} />
               <Route path="/training" element={<TrainingHub />} />
-              {/* <Route path="/initiatives" element={<InitiativesPage />}/> */}
+              <Route path="/gallery" element={<GalleryPage />}/>
               <Route path="/initiatives/:id" element={<InitiativeDetail />}/>
               <Route path="/event-register" element={<EventRegister />} />
               <Route path="volunteer-registration" element={<VolunteerRegistration />}/>

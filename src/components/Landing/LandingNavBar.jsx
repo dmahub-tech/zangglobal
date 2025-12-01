@@ -32,6 +32,7 @@ const navItems = {
   footer: [
     { path: "/store", label: "Shop" },
     { path: "/blogs", label: "Blog" },
+    { path: "/gallery", label: "Gallery" },
   ],
 };
 

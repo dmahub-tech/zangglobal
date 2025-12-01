@@ -12,21 +12,24 @@ import EventLanding from "../../components/Landing/EventSection";
 import VolunteerSection from "../../components/Landing/VoluteerSection";
 
 const LandingPage = () => {
-  const Counter = ({ value }) => {
-    const [count, setCount] = useState(0);
+  const Counter = ({ startValue, endValue }) => {
+    const [count, setCount] = useState(startValue);
 
     const startCounting = () => {
-      setCount(0); // Reset count before starting again
-      let start = 0;
-      const end = parseInt(value);
-      if (start === end) return;
+      setCount(startValue); // Reset count to start value
+      let current = startValue;
+      const end = parseInt(endValue);
+      if (current === end) return;
 
-      let totalDuration = 1000;
-      let incrementTime = totalDuration / end;
+      // Calculate duration based on the range
+      const range = end - startValue;
+      const totalDuration = 1000; // 1 second total
+      const incrementTime = totalDuration / range;
+
       let timer = setInterval(() => {
-        start += 1;
-        setCount(start);
-        if (start === end) clearInterval(timer);
+        current += 1;
+        setCount(current);
+        if (current === end) clearInterval(timer);
       }, incrementTime);
 
       return () => clearInterval(timer);
@@ -36,7 +39,7 @@ const LandingPage = () => {
       <motion.span
         whileInView={{ scale: 1.2 }}
         transition={{ duration: 0.5 }}
-        onViewportEnter={startCounting} // Restart count on entering viewport
+        onViewportEnter={startCounting}
       >
         {count}+
       </motion.span>
@@ -65,7 +68,7 @@ const LandingPage = () => {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
           >
-            <Counter value={1600} />
+            <Counter startValue={1300} endValue={1600} />
             <p>Tons of e-waste diverted from landfill </p>
           </motion.div>
 
@@ -75,7 +78,7 @@ const LandingPage = () => {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
           >
-            <Counter value={40000} />
+            <Counter startValue={4000} endValue={4294} />
             <p>Sustainable product users</p>
           </motion.div>
 
@@ -85,7 +88,7 @@ const LandingPage = () => {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.6 }}
           >
-            <Counter value={300} />
+            <Counter startValue={0} endValue={300} />
             <p>Trained IDPs on green skills </p>
           </motion.div>
         </div>
@@ -131,6 +134,7 @@ const LandingPage = () => {
         <Carousel />
       </section>
       <About />
+
       <div id="contact">
         <ContactUs />
       </div>
