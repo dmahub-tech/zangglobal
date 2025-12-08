@@ -97,6 +97,11 @@ const AdminLayout = ({ children, adminOnly = false }) => {
       path: `/admin/blogs/`,
     },
     {
+      name: "Gallery",
+      icon: <ImageIcon className="w-5 h-5" />,
+      path: `/admin/gallery/`,
+    },
+    {
       name: "Settings",
       icon: <Settings className="w-5 h-5" />,
       path: `/admin/settings/`,

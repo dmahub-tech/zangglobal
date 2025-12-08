@@ -1,10 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { useSelector, useDispatch } from "react-redux";
 import logo from "../../../assets/images/logoBlue.png";
-import { fetchUser, logout } from "../../../redux/slice/authSlice";
-import { fetchCart } from "../../../redux/slice/cartSlice";
+import { useAuthState, useLogin, useLogout, useCart } from "../../../hooks";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -13,11 +11,15 @@ const Header = () => {
   const location = useLocation();
   const profileRef = useRef();
   const navigate = useNavigate();
-  const dispatch = useDispatch();
 
-  const user = useSelector((state) => state.auth.user);
-  const token = useSelector((state) => state.auth.token);
-  const cartItems = useSelector((state) => state.cart.items?.productsInCart) || [];
+  const { data: authState } = useAuthState();
+  const { data: cartData } = useCart.useGetCart();
+  const { logout } = useLogout();
+  
+  const user = authState?.user;
+  const isAuthenticated = authState?.isAuthenticated;
+  
+  const cartItems = cartData?.productsInCart || [];
 
   // Handle scroll effect
   useEffect(() => {
@@ -28,19 +30,7 @@ const Header = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Fetch user data when logged in
-  useEffect(() => {
-    if (token) {
-      dispatch(fetchUser());
-    }
-  }, [token]);
-
-  // Fetch cart when user changes
-  useEffect(() => {
-    if (user?.userId) {
-      dispatch(fetchCart(user.userId));
-    }
-  }, [user?.userId]);
+  // No need for manual fetching - React Query handles this automatically
 
   // Close profile menu when clicking outside
   useEffect(() => {
@@ -54,7 +44,7 @@ const Header = () => {
   }, []);
 
   const handleLogout = () => {
-    dispatch(logout());
+    logout();
     navigate("/login");
   };
 

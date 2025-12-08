@@ -2,16 +2,12 @@ import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { faTrash, faMinus, faPlus, faSpinner } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Link, useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { fetchUser } from "../../../redux/slice/authSlice";
-import { fetchCart, removeFromCart, updateCartQuantity } from "../../../redux/slice/cartSlice";
 import { toast } from "react-toastify";
 import api from "../../../config/api";
 import emptyCart from '../../Images/empty_cart.webp';
+import { useAuthState, useCart } from "../../../hooks";
 
 const CartItems = () => {
-  const dispatch = useDispatch();
-
   const [voucher, setVoucher] = useState('');
   const [removingItem, setRemovingItem] = useState(null);
   const [updatingQuantity, setUpdatingQuantity] = useState(null);
@@ -20,52 +16,35 @@ const CartItems = () => {
     percentage: 0,
     message: ''
   });
-  const [isLoadingCart, setIsLoadingCart] = useState(true);
 
-  const token = useSelector(state => state.auth.token);
-  const user = useSelector(state => state.auth.user);
-  const totalPrice = useSelector(state => state.cart.items.total);
-console.log("Carts:", totalPrice);
-  const cartItems = useSelector((state) => state.cart.items.productsInCart) || [];
+  const { data: authState } = useAuthState();
+  const { data: cartData, isLoading: isLoadingCart } = useCart.useGetCart();
+  const removeFromCartMutation = useCart.useRemoveFromCart();
+  const updateQuantityMutation = useCart.useUpdateCartQuantity();
+  
+  const user = authState?.user;
 
-  // Fetch user only when token is present and user is not already fetched
-  useEffect(() => {
-    if (token && !user.userId) {
-      dispatch(fetchUser());
-    }
-  }, [token, user.userId, dispatch]);
+  const totalPrice = cartData?.total || 0;
+  const cartItems = cartData?.productsInCart || [];
 
-  // Fetch cart when user is available and cart is not fetched
-  useEffect(() => {
-    if (user?.userId) {
-      setIsLoadingCart(true);
-      dispatch(fetchCart(user?.userId))
-        .finally(() => setIsLoadingCart(false));
-    }
-  }, [user?.userId, dispatch,updateCartQuantity]);
+  // No need for manual fetching - React Query handles this automatically
 
   const handleRemoveFromCart = useCallback(async (product) => {
     setRemovingItem(product.productId);
-    try {
-      const result = await dispatch(removeFromCart({
-        userId: user.userId,
-        productId: product.productId
-      })).unwrap();
-  
-      // Check if the removal was successful
-      if (result) {
-        toast.success(`${product.name} removed from cart!`);
-        // Update local state immediately for better UX
-        dispatch(fetchCart(user.userId)); // Refresh the cart from server
-      } else {
-        throw new Error("Failed to remove item");
+    removeFromCartMutation.mutate(
+      { productId: product.productId },
+      {
+        onSuccess: () => {
+          toast.success(`${product.name} removed from cart!`);
+          setRemovingItem(null);
+        },
+        onError: (error) => {
+          toast.error(error?.message || "Failed to remove item.");
+          setRemovingItem(null);
+        }
       }
-    } catch (error) {
-      toast.error(error?.message || "Failed to remove item.");
-    } finally {
-      setRemovingItem(null);
-    }
-  }, [dispatch, user.userId]);
+    );
+  }, [removeFromCartMutation]);
   const handleQuantityChange = useCallback(async (productId, change) => {
     const product = cartItems.find(item => item.productId === productId);
     if (!product) return;
@@ -74,20 +53,19 @@ console.log("Carts:", totalPrice);
     if (newQuantity < 1 || newQuantity > 10) return;
 
     setUpdatingQuantity(productId);
-    try {
-      await dispatch(updateCartQuantity({
-        userId: user.userId,
-        productId,
-        productQty: newQuantity,
-      })).unwrap();
-      dispatch(fetchCart(user?.userId))
-    
-    } catch (error) {
-      toast.error(error?.message || "Failed to update quantity");
-    } finally {
-      setUpdatingQuantity(null);
-    }
-  }, [dispatch, cartItems, user.userId]);
+    updateQuantityMutation.mutate(
+      { productId, quantity: newQuantity },
+      {
+        onSuccess: () => {
+          setUpdatingQuantity(null);
+        },
+        onError: (error) => {
+          toast.error(error?.message || "Failed to update quantity");
+          setUpdatingQuantity(null);
+        }
+      }
+    );
+  }, [updateQuantityMutation, cartItems]);
 
   const handleVoucherRedeem = useCallback(async () => {
     if (!voucher.trim()) return;

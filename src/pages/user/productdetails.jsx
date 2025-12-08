@@ -21,57 +21,33 @@ import {
 import { Helmet } from "react-helmet";
 import ReviewSection from './ReviewSection';
 import ReviewForm from './ReviewForm';
-import api, { fetchProductById } from '../../config/api';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
-import { useDispatch, useSelector } from 'react-redux';
 import AddToCart from '../../components/user/addToCart';
+import { useAuthState, useProducts, useProductReviews, useCreateReview } from '../../hooks';
 
 const ProductDetail = () => {
   const { productId } = useParams();
   const navigate = useNavigate();
-  const [product, setProduct] = useState(null);
   const [selectedImage, setSelectedImage] = useState(0);
   const [stockStatus, setStockStatus] = useState(null);
   const [recentlyViewed, setRecentlyViewed] = useState([]);
-  const [reviews, setReviews] = useState([]);
   const [showReviewForm, setShowReviewForm] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [isWishlisted, setIsWishlisted] = useState(false);
 
-  const user = useSelector(state => state.auth.user);
+  const { data: authState } = useAuthState();
+  const { data: product, isLoading: loading } = useProducts.useGetProduct(productId);
+  const { data: reviews = [] } = useProductReviews(productId);
+  const createReviewMutation = useCreateReview();
+
+  const user = authState?.user;
   const userId = user?.userId;
 
   useEffect(() => {
-    if (!productId) return;
-
-    const fetchProduct = async () => {
-      try {
-        const data = await fetchProductById(productId);
-        setProduct(data);
-        calculateStockStatus(data);
-      } catch (error) {
-        toast.error("Failed to load product details");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProduct();
-  }, [productId]);
-
-  useEffect(() => {
-    const fetchReviews = async () => {
-      try {
-        const response = await api.get(`/reviews/product/${productId}`);
-        const data = await response?.data;
-        setReviews(data);
-      } catch (error) {
-        console.error('Error fetching reviews:', error);
-      }
-    };
-    fetchReviews();
-  }, [productId]);
+    if (product) {
+      calculateStockStatus(product);
+    }
+  }, [product]);
 
   const calculateStockStatus = (productData) => {
     if (!productData) return;
@@ -97,31 +73,19 @@ const ProductDetail = () => {
     setStockStatus({ status, color, stock });
   };
 
-  const submitReview = async (data) => {
-    try {
-      const response = await api.post(`/reviews/new`, data, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      toast.success("Review added successfully!");
-      return response.data;
-    } catch (error) {
-      toast.error("Failed to submit review");
-      throw error;
-    }
-  };
-
   const handleSubmitReview = async (e, reviewData) => {
     e.preventDefault();
     const data = { userId, productId, ...reviewData };
-    try {
-      const newReview = await submitReview(data);
-      setReviews([newReview, ...reviews]);
-      setShowReviewForm(false);
-    } catch (error) {
-      console.error("Failed to submit review:", error.message);
-    }
+    createReviewMutation.mutate(data, {
+      onSuccess: () => {
+        toast.success("Review added successfully!");
+        setShowReviewForm(false);
+      },
+      onError: (error) => {
+        toast.error("Failed to submit review");
+        console.error("Failed to submit review:", error.message);
+      }
+    });
   };
 
   const handlePreviousImage = () => {

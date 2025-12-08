@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Eye, EyeOff, Loader2, Lock, Mail } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useDispatch, useSelector } from "react-redux";
-import { loginUser } from "../../redux/slice/authSlice";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { useAuthState, useLogin } from "../../hooks";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -12,9 +11,11 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [formErrors, setFormErrors] = useState({});
   
-  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { loading, error, isAuthenticated } = useSelector((state) => state.auth);
+  const { data: authState } = useAuthState();
+  const loginMutation = useLogin();
+  
+  const isAuthenticated = authState?.isAuthenticated;
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -25,11 +26,11 @@ const Login = () => {
 
   // Handle auth errors
   useEffect(() => {
-    if (error) {
-      toast.error(error);
-      setFormErrors({ root: error });
+    if (loginMutation.error) {
+      toast.error(loginMutation.error.message || 'Login failed');
+      setFormErrors({ root: loginMutation.error.message || 'Login failed' });
     }
-  }, [error]);
+  }, [loginMutation.error]);
 
   const validateForm = () => {
     const errors = {};
@@ -55,13 +56,15 @@ const Login = () => {
     
     if (!validateForm()) return;
     
-    try {
-      await dispatch(loginUser({ email, password })).unwrap();
-      toast.success("Login successful! Redirecting...");
-      navigate("/store");
-    } catch (err) {
-      // Error handling is done via the error effect
-    }
+    loginMutation.mutate(
+      { email, password },
+      {
+        onSuccess: () => {
+          toast.success("Login successful! Redirecting...");
+          navigate("/store");
+        }
+      }
+    );
   };
 
   return (
@@ -156,9 +159,9 @@ const Login = () => {
               type="submit"
               className="w-full bg-indigo-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-indigo-700 transition duration-200 flex items-center justify-center"
               whileTap={{ scale: 0.98 }}
-              disabled={loading}
+              disabled={loginMutation.isPending}
             >
-              {loading ? (
+              {loginMutation.isPending ? (
                 <>
                   <Loader2 className="animate-spin mr-2" size={20} />
                   Logging in...

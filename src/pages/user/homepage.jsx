@@ -6,13 +6,12 @@ import React, {
   lazy,
   Suspense,
 } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { FiArrowRight, FiShoppingCart, FiX } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
 import { debounce } from "lodash-es";
-import { fetchProducts } from "../../config/api";
 import ProductCardSkeleton from "../../components/user/ProductCardSkeleton";
+import { useProducts } from "../../hooks";
 
 // Lazy load heavy components
 const CartItems = lazy(() => import("../../components/user/cart/Cartitems"));
@@ -255,23 +254,9 @@ const ProductGrid = React.memo(({ title, products, showCategories = true, isLoad
 
 const HomePage = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [products, setProducts] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    const fetchProductsData = async () => {
-      try {
-        const productData = await fetchProducts();
-        setProducts(productData.data);
-      } catch (error) {
-        console.log(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProductsData();
-  }, []);
+  
+  const { data: productsData, isLoading: loading } = useProducts.useGetProducts();
+  const products = productsData?.data;
 
   useEffect(() => {
     let interval;

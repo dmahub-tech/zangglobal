@@ -10,47 +10,24 @@ import {
 } from "lucide-react";
 import { FaMoneyBill, FaRupeeSign } from "react-icons/fa";
 
-import { useSelector, useDispatch } from "react-redux";
-import { getProducts } from "../../redux/slice/productSlice";
 import { useAdminAuth } from "../../context/Admin";
 import { toast } from "react-toastify";
-import api from "../../config/api";
+import { useProducts, useAllOrders } from "../../hooks";
 
 const Dashboard = () => {
-  const [orders, setOrders] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const dispatch = useDispatch();
-  const { products, loading } = useSelector((state) => state.product);
-
   const { admin } = useAdminAuth();
+  const { data: productsData, isLoading: productsLoading, refetch: refetchProducts } = useProducts.useGetProducts();
+  const { data: ordersData, isLoading: ordersLoading, refetch: refetchOrders } = useAllOrders();
+  
+  const products = productsData?.data || [];
+  const orders = ordersData || [];
+  const isLoading = productsLoading || ordersLoading;
 
-  console.log(admin);
-
-  // Redux State
-
-  // Local state for refreshing manually
-  const [refresh, setRefresh] = useState(false);
-
-  useEffect(() => {
-    dispatch(getProducts());
-  }, [refresh]); // Refresh dependency added
-  useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        const response = await api.get('/admin/orders');
-        console.log(response.data.data);
-        setOrders(response.data.data);
-      } catch (error) {
-        console.error('Error fetching orders:', error);
-        toast.error('Failed to load orders');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchOrders();
-  }, [refresh]);
+  const handleRefresh = () => {
+    refetchProducts();
+    refetchOrders();
+    toast.success('Data refreshed!');
+  };
 
 
   console.log(orders);
@@ -108,9 +85,7 @@ const Dashboard = () => {
           </div>
           <button
             className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-mutedPrimary transition flex items-center"
-            onClick={(e) => {
-              setRefresh(!refresh);
-            }}
+            onClick={handleRefresh}
           >
             <TrendingUp className="mr-2 h-5 w-5" /> Refresh Data
           </button>

@@ -1,8 +1,9 @@
 import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
-import { Provider } from "react-redux";
-import store from "./redux/store";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import queryClient from "./config/queryClient";
 
 // Layouts
 import StoreLayout from "./layouts/StoreLayout";
@@ -56,7 +57,7 @@ import GalleryPage from "./pages/landingPage/Gallery";
 function App() {
   return (
     <React.StrictMode>
-      <Provider store={store}>
+      <QueryClientProvider client={queryClient}>
         <ToastContainer />
         <BrowserRouter>
         <ScrollToTop />
@@ -132,7 +133,9 @@ function App() {
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </BrowserRouter>
-      </Provider>
+        {/* React Query Devtools - only shows in development */}
+        <ReactQueryDevtools initialIsOpen={false} />
+      </QueryClientProvider>
     </React.StrictMode>
   );
 }

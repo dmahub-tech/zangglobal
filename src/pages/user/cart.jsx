@@ -5,28 +5,27 @@ import RecentlyViewed from "../../components/user/cart/recentlyviewed";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Helmet } from "react-helmet";
-import { useSelector } from "react-redux";
-
-// Mock user fetch (replace this with your actual auth context or state)
+import { useAuthState } from "../../hooks";
 
 const ShoppingCartPage = () => {
-  const user  = useSelector((state)=>state.auth.user)
-  console.log("User data:", user); // Debugging line to check user data
-  console.log(user)
+  const { data: authState } = useAuthState();
   const navigate = useNavigate();
+  
+  const user = authState?.user;
+  const isAuthenticated = authState?.isAuthenticated;
 
   useEffect(() => {
-    if (!user) {
+    if (!isAuthenticated) {
       // Redirect to auth after 2 seconds
       const timeout = setTimeout(() => {
-        navigate("/login"); // 👈 Replace with your actual auth route
+        navigate("/login");
       }, 2000);
 
       return () => clearTimeout(timeout);
     }
-  }, [user, navigate]);
+  }, [isAuthenticated, navigate]);
 
-  if (!user) {
+  if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white text-center px-4">
         <div>
