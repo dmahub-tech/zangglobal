@@ -101,9 +101,9 @@ const LandingPage = () => {
       {/* <Navbar /> */}
       <Hero />
 
-      <EventLanding />
+      {/* <EventLanding /> */}
 
-      <VolunteerSection />
+      {/* <VolunteerSection /> */}
       {/* why us */}
       <section
         id="why-us"

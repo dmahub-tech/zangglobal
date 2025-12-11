@@ -2,9 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Pencil, Save, Search, ArrowUpDown, Trash, X, ChevronLeft, ChevronRight, Upload, Loader2, ImageIcon } from 'lucide-react';
 import { Helmet } from "react-helmet";
 import { useParams, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { deleteProduct, getProducts, updateProduct } from '../../redux/slice/productSlice';
-import { fetchProducts } from '../../config/api';
+import { useProducts, useDeleteProduct, useUpdateProduct } from '../../hooks';
 
 const Product = () => {
   const { sellerId } = useParams();
@@ -32,31 +30,15 @@ const Product = () => {
   const [uploadStatus, setUploadStatus] = useState('');
   const [selectedFile, setSelectedFile] = useState(null);
 
+  const { data: products, isLoading, isError, error } = useProducts();
+  const { mutate: deleteProduct } = useDeleteProduct();
+  const { mutate: updateProduct } = useUpdateProduct();
 
-  const dispatch = useDispatch()
-
-    
-  const { products, loading, error } = useSelector((state) => state.product);
-  const [refresh, setRefresh] = useState(false);
-
-  useEffect(() => {
-    dispatch(getProducts());
-  }, [ refresh]); // Refresh dependency added
-
-  const productData = products
-  
+  const productData = products;
 
   const handleDelete = async (product) => {
-    console.log("Deleting...", product.name);
-    try {
-        await dispatch(deleteProduct(product.productId));
-        console.log("Deleting successful, refreshing product list...");
-        setRefresh(prev => !prev); // Toggle refresh state
-    } catch (error) {
-        console.log(error);
-    }
-};
-
+    deleteProduct(product.productId);
+  };
 
   const handleDeleteImage = async (imageUrl) => {
     try {
@@ -90,17 +72,12 @@ const Product = () => {
   };
 
   const handleSave = async () => {
-    try {
-      await dispatch(updateProduct({
-        productId: selectedProduct.productId,
-        productData: editValues
-      }));
-      setEditingId(null);
-      setShowDetailModal(false);
-      setRefresh(prev => !prev);
-    } catch (error) {
-      console.error('Error updating product:', error);
-    }
+    updateProduct({
+      productId: selectedProduct.productId,
+      productData: editValues
+    });
+    setEditingId(null);
+    setShowDetailModal(false);
   };
 
   const handleSort = (key) => {
@@ -113,11 +90,11 @@ const Product = () => {
 
   const handleImageNavigation = (direction) => {
     if (direction === 'prev') {
-      setCurrentImageIndex((prev) => 
+      setCurrentImageIndex((prev) =>
         prev === 0 ? editValues.img.length - 1 : prev - 1
       );
     } else {
-      setCurrentImageIndex((prev) => 
+      setCurrentImageIndex((prev) =>
         prev === editValues.img.length - 1 ? 0 : prev + 1
       );
     }
@@ -125,7 +102,7 @@ const Product = () => {
 
   const sortedProducts = React.useMemo(() => {
     if (!Array.isArray(productData)) return [];
-    
+
     let sortableProducts = [...productData];
     if (sortConfig.key !== null) {
       sortableProducts.sort((a, b) => {
@@ -139,15 +116,16 @@ const Product = () => {
       });
     }
     return sortableProducts;
-  }, [products, sortConfig]);
+  }, [productData, sortConfig]);
 
-  const filteredProducts = sortedProducts.filter(product => 
-    productData?.productId?.toString().toLowerCase().includes(searchQuery.toLowerCase()) ||
-    productData?.name?.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredProducts = sortedProducts.filter(product =>
+    product?.productId?.toString().toLowerCase().includes(searchQuery.toLowerCase()) ||
+    product?.name?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-console.log(sortedProducts,"sorted Products")
+  console.log(sortedProducts,"sorted Products")
   console.log(filteredProducts, ",these are filtered products")
+
 
 
   return (

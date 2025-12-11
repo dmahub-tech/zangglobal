@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { Link } from "react-router-dom";
 import {
   FaMinus,
   FaPlus,
@@ -16,15 +16,21 @@ import {
   FaChevronLeft,
   FaChevronRight,
   FaShare,
-  FaHeart
-} from 'react-icons/fa';
+  FaHeart,
+} from "react-icons/fa";
 import { Helmet } from "react-helmet";
-import ReviewSection from './ReviewSection';
-import ReviewForm from './ReviewForm';
-import Skeleton from 'react-loading-skeleton';
-import 'react-loading-skeleton/dist/skeleton.css';
-import AddToCart from '../../components/user/addToCart';
-import { useAuthState, useProducts, useProductReviews, useCreateReview } from '../../hooks';
+import ReviewSection from "./ReviewSection";
+import ReviewForm from "./ReviewForm";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
+import AddToCart from "../../components/user/addToCart";
+import {
+  useAuthState,
+  useProducts,
+  useProductReviews,
+  useCreateReview,
+  useProduct,
+} from "../../hooks";
 
 const ProductDetail = () => {
   const { productId } = useParams();
@@ -36,7 +42,7 @@ const ProductDetail = () => {
   const [isWishlisted, setIsWishlisted] = useState(false);
 
   const { data: authState } = useAuthState();
-  const { data: product, isLoading: loading } = useProducts.useGetProduct(productId);
+  const { data: product, isLoading: loading } = useProduct(productId);
   const { data: reviews = [] } = useProductReviews(productId);
   const createReviewMutation = useCreateReview();
 
@@ -53,21 +59,21 @@ const ProductDetail = () => {
     if (!productData) return;
 
     const stock = productData.inStockValue || 0;
-    let status = '';
-    let color = '';
+    let status = "";
+    let color = "";
 
     if (stock > 50) {
-      status = 'In Stock';
-      color = 'bg-green-50 text-green-800';
+      status = "In Stock";
+      color = "bg-green-50 text-green-800";
     } else if (stock > 10) {
-      status = 'Low Stock';
-      color = 'bg-yellow-50 text-yellow-800';
+      status = "Low Stock";
+      color = "bg-yellow-50 text-yellow-800";
     } else if (stock > 0) {
-      status = 'Very Low Stock';
-      color = 'bg-orange-50 text-orange-800';
+      status = "Very Low Stock";
+      color = "bg-orange-50 text-orange-800";
     } else {
-      status = 'Out of Stock';
-      color = 'bg-red-50 text-red-800';
+      status = "Out of Stock";
+      color = "bg-red-50 text-red-800";
     }
 
     setStockStatus({ status, color, stock });
@@ -84,30 +90,38 @@ const ProductDetail = () => {
       onError: (error) => {
         toast.error("Failed to submit review");
         console.error("Failed to submit review:", error.message);
-      }
+      },
     });
   };
 
   const handlePreviousImage = () => {
-    setSelectedImage(prev => (prev === 0 ? product.img.length - 1 : prev - 1));
+    setSelectedImage((prev) =>
+      prev === 0 ? product.img.length - 1 : prev - 1
+    );
   };
 
   const handleNextImage = () => {
-    setSelectedImage(prev => (prev === product.img.length - 1 ? 0 : prev + 1));
+    setSelectedImage((prev) =>
+      prev === product.img.length - 1 ? 0 : prev + 1
+    );
   };
 
   const toggleWishlist = () => {
     setIsWishlisted(!isWishlisted);
-    toast.success(!isWishlisted ? "Added to wishlist" : "Removed from wishlist");
+    toast.success(
+      !isWishlisted ? "Added to wishlist" : "Removed from wishlist"
+    );
   };
 
   const shareProduct = () => {
     if (navigator.share) {
-      navigator.share({
-        title: product.name,
-        text: `Check out this product: ${product.name}`,
-        url: window.location.href,
-      }).catch(console.error);
+      navigator
+        .share({
+          title: product.name,
+          text: `Check out this product: ${product.name}`,
+          url: window.location.href,
+        })
+        .catch(console.error);
     } else {
       navigator.clipboard.writeText(window.location.href);
       toast.info("Link copied to clipboard!");
@@ -128,7 +142,7 @@ const ProductDetail = () => {
                 ))}
               </div>
             </div>
-            
+
             {/* Product Info Skeleton */}
             <div className="space-y-6">
               <Skeleton height={32} width="70%" />
@@ -164,7 +178,7 @@ const ProductDetail = () => {
       <div className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8 mt-16 md:mt-24">
           {/* Back Button */}
-          <button 
+          <button
             onClick={() => navigate(-1)}
             className="flex items-center text-pink-600 hover:text-pink-800 mb-4 md:mb-6 transition-colors text-sm md:text-base"
           >
@@ -189,7 +203,7 @@ const ProductDetail = () => {
                     className="w-full h-full object-contain p-2 md:p-4"
                     loading="lazy"
                   />
-                  
+
                   {/* Navigation Arrows - Mobile: Only show on hover */}
                   <div className="md:hidden absolute inset-0 flex items-center justify-between px-2 opacity-0 hover:opacity-100 transition-opacity">
                     <button
@@ -205,7 +219,7 @@ const ProductDetail = () => {
                       <FaChevronRight className="text-gray-700 text-sm" />
                     </button>
                   </div>
-                  
+
                   {/* Navigation Arrows - Desktop: Always visible */}
                   <div className="hidden md:block">
                     <button
@@ -221,7 +235,7 @@ const ProductDetail = () => {
                       <FaChevronRight className="text-gray-700" />
                     </button>
                   </div>
-                  
+
                   {/* Badges */}
                   <div className="absolute top-2 md:top-4 left-2 md:left-4 flex space-x-1 md:space-x-2">
                     {product.isNew && (
@@ -236,14 +250,18 @@ const ProductDetail = () => {
                     )}
                   </div>
                 </div>
-                
+
                 {/* Thumbnail Gallery */}
                 <div className="grid grid-cols-4 gap-1 md:gap-2">
                   {product.img.map((img, index) => (
                     <button
                       key={index}
                       onClick={() => setSelectedImage(index)}
-                      className={`aspect-square bg-gray-100 rounded md:rounded-lg overflow-hidden border ${selectedImage === index ? 'border-pink-500' : 'border-transparent'}`}
+                      className={`aspect-square bg-gray-100 rounded md:rounded-lg overflow-hidden border ${
+                        selectedImage === index
+                          ? "border-pink-500"
+                          : "border-transparent"
+                      }`}
                     >
                       <img
                         src={img}
@@ -267,7 +285,7 @@ const ProductDetail = () => {
                       <div className="flex items-center bg-yellow-50 px-1.5 py-0.5 md:px-2 md:py-1 rounded text-sm md:text-base">
                         <FaStar className="text-yellow-500 mr-0.5 md:mr-1" />
                         <span className="font-medium text-yellow-700">
-                          {product.rating || '4.5'}
+                          {product.rating || "4.5"}
                         </span>
                         <span className="text-gray-500 text-xs md:text-sm ml-0.5 md:ml-1">
                           ({reviews.length} reviews)
@@ -275,15 +293,22 @@ const ProductDetail = () => {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="flex space-x-2 md:space-x-3">
-                    <button 
+                    <button
                       onClick={toggleWishlist}
-                      className={`p-1.5 md:p-2 rounded-full ${isWishlisted ? 'text-pink-600' : 'text-gray-400 hover:text-pink-600'}`}
+                      className={`p-1.5 md:p-2 rounded-full ${
+                        isWishlisted
+                          ? "text-pink-600"
+                          : "text-gray-400 hover:text-pink-600"
+                      }`}
                     >
-                      <FaHeart className={isWishlisted ? 'fill-current' : ''} size={18} />
+                      <FaHeart
+                        className={isWishlisted ? "fill-current" : ""}
+                        size={18}
+                      />
                     </button>
-                    <button 
+                    <button
                       onClick={shareProduct}
                       className="p-1.5 md:p-2 rounded-full text-gray-400 hover:text-pink-600"
                     >
@@ -306,7 +331,9 @@ const ProductDetail = () => {
                   </div>
                   {product.discount && (
                     <span className="text-green-600 font-medium text-sm md:text-base">
-                      Save ₦{(product.originalPrice - product.price).toLocaleString()} ({product.discount}%)
+                      Save ₦
+                      {(product.originalPrice - product.price).toLocaleString()}{" "}
+                      ({product.discount}%)
                     </span>
                   )}
                 </div>
@@ -318,11 +345,21 @@ const ProductDetail = () => {
 
                 {/* Stock Status */}
                 <div className="flex flex-wrap gap-1 md:gap-2">
-                  <div className={`px-2 py-1 md:px-3 md:py-2 rounded-lg flex items-center text-xs md:text-sm font-medium ${stockStatus?.color}`}>
-                    {stockStatus?.status === "In Stock" && <FaBox className="mr-1 md:mr-2" size={12} />}
-                    {stockStatus?.status === "Low Stock" && <FaExclamationCircle className="mr-1 md:mr-2" size={12} />}
-                    {stockStatus?.status === "Very Low Stock" && <FaWarehouse className="mr-1 md:mr-2" size={12} />}
-                    {stockStatus?.status === "Out of Stock" && <FaShippingFast className="mr-1 md:mr-2" size={12} />}
+                  <div
+                    className={`px-2 py-1 md:px-3 md:py-2 rounded-lg flex items-center text-xs md:text-sm font-medium ${stockStatus?.color}`}
+                  >
+                    {stockStatus?.status === "In Stock" && (
+                      <FaBox className="mr-1 md:mr-2" size={12} />
+                    )}
+                    {stockStatus?.status === "Low Stock" && (
+                      <FaExclamationCircle className="mr-1 md:mr-2" size={12} />
+                    )}
+                    {stockStatus?.status === "Very Low Stock" && (
+                      <FaWarehouse className="mr-1 md:mr-2" size={12} />
+                    )}
+                    {stockStatus?.status === "Out of Stock" && (
+                      <FaShippingFast className="mr-1 md:mr-2" size={12} />
+                    )}
                     {stockStatus?.status} ({stockStatus?.stock} available)
                   </div>
                   <div className="px-2 py-1 md:px-3 md:py-2 rounded-lg bg-gray-100 text-gray-800 text-xs md:text-sm font-medium flex items-center">
@@ -333,13 +370,8 @@ const ProductDetail = () => {
 
                 {/* Action Buttons */}
                 <div className="grid grid-cols-2 gap-3 md:gap-4 pt-4 md:pt-6">
-                  <AddToCart 
-                    product={product} 
-                    className="w-full"
-                  />
-                  <button
-                    className="w-full py-2 md:py-3 px-4 md:px-6 bg-pink-600 hover:bg-pink-700 text-white font-medium rounded-lg transition-colors text-sm md:text-base"
-                  >
+                  <AddToCart product={product} className="w-full" />
+                  <button className="w-full py-2 md:py-3 px-4 md:px-6 bg-pink-600 hover:bg-pink-700 text-white font-medium rounded-lg transition-colors text-sm md:text-base">
                     Buy Now
                   </button>
                 </div>
@@ -364,7 +396,9 @@ const ProductDetail = () => {
             </div>
             <div className="p-4 md:p-6">
               <div className="prose max-w-none text-sm md:text-base">
-                <h3 className="text-base md:text-lg font-medium text-gray-900">Product Details</h3>
+                <h3 className="text-base md:text-lg font-medium text-gray-900">
+                  Product Details
+                </h3>
                 <p>{product.description}</p>
                 {/* Add more detailed description content here */}
               </div>
@@ -397,11 +431,13 @@ const ProductDetail = () => {
           {/* Recently Viewed */}
           {recentlyViewed.length > 0 && (
             <div className="mt-8 md:mt-12">
-              <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-4 md:mb-6">Recently Viewed</h2>
+              <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-4 md:mb-6">
+                Recently Viewed
+              </h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
                 {recentlyViewed.map((item) => (
-                  <Link 
-                    key={item.productId} 
+                  <Link
+                    key={item.productId}
                     to={`/${item.productId}`}
                     className="group"
                   >
@@ -433,6 +469,6 @@ const ProductDetail = () => {
       </div>
     </>
   );
-}
+};
 
 export default ProductDetail;

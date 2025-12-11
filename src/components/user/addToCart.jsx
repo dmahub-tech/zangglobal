@@ -1,30 +1,24 @@
-import { useDispatch, useSelector } from "react-redux";
-import {
-  addToCart,
-  fetchCart,
-  updateCartQuantity,
-} from "../../redux/slice/cartSlice";
 import { toast } from "react-toastify";
 import React, { useEffect, useState } from "react";
-import { fetchUser } from "../../redux/slice/authSlice";
 import { useNavigate } from "react-router-dom";
 import { FaMinus, FaPlus, FaShoppingCart, FaCheck } from "react-icons/fa";
 import { motion } from "framer-motion";
+import { useAddToCart, useCart, useUpdateCartItem, useAuthState } from "../../hooks";
 
 const AddToCart = ({ product }) => {
-  const dispatch = useDispatch();
-  const cartItem = useSelector((state) => state.cart.items.productsInCart);
-  const user = useSelector((state) => state.auth.user);
-  const token = useSelector((state) => state.auth.token);
+  const { mutate: addToCart, isLoading: isAdding } = useAddToCart();
+  const { mutate: updateCartItem, isLoading: isUpdating } = useUpdateCartItem();
+  const { data: cartData } = useCart();
+  const { data: authState } = useAuthState();
+  const { user } = authState || {};
+
+  const cartItem = cartData?.productsInCart;
   const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1);
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [isAdding, setIsAdding] = useState(false);
 
-  const  userId = user?.userId
+  const userId = user?.userId;
 
-
-  const isInCart =cartItem?.some(
+  const isInCart = cartItem?.some(
     (item) => item.productId === product.productId
   );
 
@@ -38,8 +32,7 @@ const AddToCart = ({ product }) => {
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [product.productId]); // only run when product changes
-  
+  }, [product.productId, cartItem]);
 
   const handleQuantityChange = (change) => {
     const newQuantity = quantity + change;
@@ -49,22 +42,10 @@ const AddToCart = ({ product }) => {
   };
 
   const handleUpdateQuantity = async () => {
-    setIsUpdating(true);
-    try {
-      await dispatch(
-        updateCartQuantity({
-          productId: product.productId,
-          productQty: quantity,
-          userId,
-        })
-      ).unwrap();
-      toast.success("Quantity updated!");
-    } catch (error) {
-      toast.error(error?.message || "Failed to update quantity");
-      console.error("Error updating quantity:", error);
-    } finally {
-      setIsUpdating(false);
-    }
+    updateCartItem({
+      productId: product.productId,
+      quantity: quantity,
+    });
   };
 
   const handleAddToCart = async () => {
@@ -73,26 +54,11 @@ const AddToCart = ({ product }) => {
       navigate("/signup");
       return;
     }
-  
-    setIsAdding(true);
-    try {
-      await dispatch(
-        addToCart({
-          productId: product.productId,
-          productQty: quantity,
-          userId: user.userId,
-        })
-      ).unwrap();
-  
-      // The toast will now be shown from the Redux slice
-      // Refresh the cart to ensure consistency
-      await dispatch(fetchCart(user.userId));
-    } catch (error) {
-      // Error toast will be shown from Redux slice
-      console.error("Add to cart error:", error);
-    } finally {
-      setIsAdding(false);
-    }
+
+    addToCart({
+      productId: product.productId,
+      quantity: quantity,
+    });
   };
   
 

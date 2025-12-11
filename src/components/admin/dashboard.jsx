@@ -16,7 +16,7 @@ import { useProducts, useAllOrders } from "../../hooks";
 
 const Dashboard = () => {
   const { admin } = useAdminAuth();
-  const { data: productsData, isLoading: productsLoading, refetch: refetchProducts } = useProducts.useGetProducts();
+  const { data: productsData, isLoading: productsLoading, refetch: refetchProducts } = useProducts();
   const { data: ordersData, isLoading: ordersLoading, refetch: refetchOrders } = useAllOrders();
   
   const products = productsData?.data || [];

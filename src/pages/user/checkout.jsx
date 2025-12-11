@@ -4,9 +4,7 @@ import { CheckCircle, CreditCard, Tag, Loader2, Truck, MapPin, Home, Package } f
 import confetti from "canvas-confetti";
 import { Helmet } from "react-helmet";
 import { useLocation } from "react-router";
-import { useDispatch, useSelector } from "react-redux";
-import { fetchCart } from "../../redux/slice/cartSlice";
-import { fetchUser } from "../../redux/slice/authSlice";
+import { useAuthState, useCart } from "../../hooks";
 import api from "../../config/api";
 
 const Checkout = () => {
@@ -28,19 +26,10 @@ const Checkout = () => {
   const [saveAddress, setSaveAddress] = useState(false);
   const [activeStep, setActiveStep] = useState(1); // 1: Address, 2: Payment
 
-  const dispatch = useDispatch();
-  const user = useSelector((state) => state.auth.user);
-  const token = useSelector((state) => state.auth.token);
-
-  const total = useSelector((state) => state.cart.items.total);
-  const cartId = useSelector((state) => state.cart.items);
-  const cartItems = useSelector((state) => state.cart.items.productsInCart);
-
-  useEffect(() => {
-    if (token) {
-      dispatch(fetchUser());
-    }
-  }, [token]);
+  const { data: authState } = useAuthState();
+  const { user } = authState || {};
+  const { data: cartData } = useCart();
+  const { productsInCart: cartItems, total, _id: cartId } = cartData || {};
 
   const queryParams = new URLSearchParams(location.search);
   const trxref = queryParams.get("trxref");
@@ -70,12 +59,6 @@ const Checkout = () => {
       verifyPayment();
     }
   }, [trxref, reference]);
-
-  useEffect(() => {
-    if (user) {
-      dispatch(fetchCart(user.userId));
-    }
-  }, [user]);
 
   useEffect(() => {
     const savedAddress = localStorage.getItem("savedShippingAddress");
@@ -132,6 +115,7 @@ const Checkout = () => {
       alert("❌ Error initializing payment.");
     }
   };
+
 
   const handleAddressChange = (e) => {
     const { name, value } = e.target;

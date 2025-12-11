@@ -255,8 +255,8 @@ const ProductGrid = React.memo(({ title, products, showCategories = true, isLoad
 const HomePage = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   
-  const { data: productsData, isLoading: loading } = useProducts.useGetProducts();
-  const products = productsData?.data;
+  const { data: productsData, isLoading: loading } = useProducts();
+  const products = productsData;
 
   useEffect(() => {
     let interval;

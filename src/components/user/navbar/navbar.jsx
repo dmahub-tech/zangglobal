@@ -13,7 +13,7 @@ const Header = () => {
   const navigate = useNavigate();
 
   const { data: authState } = useAuthState();
-  const { data: cartData } = useCart.useGetCart();
+  const { data: cartData } = useCart();
   const { logout } = useLogout();
   
   const user = authState?.user;

@@ -18,7 +18,7 @@ const CartItems = () => {
   });
 
   const { data: authState } = useAuthState();
-  const { data: cartData, isLoading: isLoadingCart } = useCart.useGetCart();
+  const { data: cartData, isLoading: isLoadingCart } = useCart();
   const removeFromCartMutation = useCart.useRemoveFromCart();
   const updateQuantityMutation = useCart.useUpdateCartQuantity();
   

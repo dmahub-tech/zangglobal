@@ -160,7 +160,7 @@ export const useProducts = (filters = {}) => {
   return useQuery({
     queryKey: PRODUCT_QUERY_KEYS.list(filters),
     queryFn: () => productApi.getProducts(filters),
-    select: (data) => data.data || data,
+    select: (data) =>{ data.data || data; console.log(data); return data.data || data},
     staleTime: 1000 * 60 * 5, // 5 minutes
     refetchOnWindowFocus: false,
   });

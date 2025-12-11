@@ -19,8 +19,7 @@ import {
   Settings,
   HelpCircle,
 } from "lucide-react";
-import { useDispatch } from "react-redux";
-import { createProduct } from "../redux/slice/productSlice";
+import { useCreateProduct } from "../hooks";
 import { toast } from "react-toastify";
 import { useAdminAuth } from "../context/Admin";
 import ProtectedRoute from "../components/protectedRoute";
@@ -31,8 +30,6 @@ const AdminLayout = ({ children, adminOnly = false }) => {
   const { sellerId } = useParams();
   const [isOpen, setIsOpen] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-  const [selectedFile, setSelectedFile] = useState([]);
   const [productData, setProductData] = useState({
     name: "",
     price: "",
@@ -43,7 +40,7 @@ const AdminLayout = ({ children, adminOnly = false }) => {
     visibility: true,
   });
   const location = useLocation();
-  const dispatch = useDispatch();
+  const { mutate: createProduct, isLoading: isUploading } = useCreateProduct();
 
   useEffect(() => {
     const handleResize = () => {
@@ -121,8 +118,6 @@ const AdminLayout = ({ children, adminOnly = false }) => {
     const files = Array.from(event.target.files);
     if (files.length === 0) return;
 
-    const fileURLs = files.map((file) => URL.createObjectURL(file));
-    setSelectedFile(files);
     setProductData((prevData) => ({
       ...prevData,
       img: files,
@@ -130,28 +125,20 @@ const AdminLayout = ({ children, adminOnly = false }) => {
   };
 
   const removeImage = (index) => {
-    setSelectedFile((prev) => prev.filter((_, i) => i !== index));
+    setProductData((prevData) => ({
+      ...prevData,
+      img: prevData.img.filter((_, i) => i !== index),
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      setIsUploading(true);
-      const response = await dispatch(createProduct(productData));
-
-      if (response.meta.requestStatus === "fulfilled") {
-        toast.success(`Product "${productData.name}" created successfully`);
+    createProduct(productData, {
+      onSuccess: () => {
         resetForm();
         setShowDialog(false);
-      } else {
-        toast.error(`Error creating product: ${response.payload}`);
-      }
-    } catch (error) {
-      console.error("Error creating product:", error);
-      toast.error(`Error creating product: ${error.message}`);
-    } finally {
-      setIsUploading(false);
-    }
+      },
+    });
   };
 
   const resetForm = () => {
@@ -163,7 +150,6 @@ const AdminLayout = ({ children, adminOnly = false }) => {
       description: "",
       inStockValue: 0,
     });
-    setSelectedFile([]);
   };
 
   const { admin, logout } = useAdminAuth();

@@ -1,90 +1,25 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from "react-helmet";
 import { motion } from 'framer-motion';
 import Navbar from '../../components/user/navbar/navbar';
 import { ChevronUp, ChevronDown, Clock, CreditCard, Truck, CheckCircle, XCircle } from 'lucide-react';
-import { useSelector } from 'react-redux';
-import api from '../../config/api';
+import { useUserOrders } from '../../hooks';
 
 const Order = () => {
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error,setError] = useState("")
-  const user = useSelector((state) =>state.auth.user)
-  console.log(user, "from order")
+  const { data: orders, isLoading, isError, error } = useUserOrders();
   const navigate = useNavigate();
 
-  useEffect(() => {
-  const fetchOrders = async () => {
-    setLoading(true);
-    const userId = user?.userId || localStorage.getItem('userId');
-    
-    // Don't proceed if we don't have a user ID
-    if (!userId) {
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const response = await api.get(`/orders/user/${userId}/`);
-      
-      if (response.data?.success) {
-        setOrders(response.data.data);
-      } else {
-        console.error('Unexpected response format:', response.data);
-        // You might want to set some error state here
-      }
-    } catch (error) {
-      console.error('Error fetching orders:', error);
-      // Handle specific error cases
-      if (error.response?.status === 401) {
-        // Unauthorized - maybe redirect to login
-        navigate('/login');
-      } else {
-        // Set error state for UI feedback
-        setError('Failed to load orders. Please try again later.');
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  fetchOrders();
-}, [navigate, user?.userId]); // Added user?.userId as dependency
-
-
-  const fetchProductDetails = async (productId) => {
-    try {
-      const response = await fetch('https://api.merabestie.com/:productId', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ productId }),
-      });
-  
-      const data = await response.json();
-      if (data.success) {
-        return data.product;
-      }
-    } catch (error) {
-      console.error('Error fetching product details:', error);
-    }
-    return null;
-  };
-  
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-pink-100 to-purple-100">
-
         <div className="flex flex-col justify-center items-center h-[calc(100vh-64px)]">
-          <motion.div 
+          <motion.div
             className="w-16 h-16 border-4 border-pink-600 border-t-transparent rounded-full"
             animate={{ rotate: 360 }}
             transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
           />
-          <motion.p 
+          <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
@@ -95,6 +30,16 @@ const Order = () => {
         </div>
       </div>
     );
+  }
+
+  if (isError) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-pink-100 to-purple-100">
+        <div className="flex flex-col justify-center items-center h-[calc(100vh-64px)]">
+          <p className="text-red-500">{error.message}</p>
+        </div>
+      </div>
+    )
   }
 
   return (

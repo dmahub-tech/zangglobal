@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { Eye, EyeOff, User, Mail, Phone, Lock, Loader2 } from "lucide-react";
-import { useDispatch, useSelector } from "react-redux";
-import { registerUser } from "../../redux/slice/authSlice";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
+import { useRegister, useAuthState } from "../../hooks";
 
 export default function SignUp() {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { isAuthenticated, loading: authLoading, error: authError } = useSelector((state) => state.auth);
+  const { mutate: registerUser, isLoading: authLoading, isSuccess, isError, error: authError } = useRegister();
+  const { data: authState } = useAuthState();
+  const { isAuthenticated } = authState || {};
   const [showPassword, setShowPassword] = useState(false);
 
   const {
@@ -32,19 +32,18 @@ export default function SignUp() {
 
   // Handle auth errors
   useEffect(() => {
-    if (authError) {
-      setError("root", { message: authError });
+    if (isError && authError) {
+      setError("root", { message: authError.message });
     }
-  }, [authError, setError]);
+  }, [isError, authError, setError]);
 
   const onSubmit = async (data) => {
-    try {
-      await dispatch(registerUser(data)).unwrap();
-      reset();
-      navigate("/login");
-    } catch (error) {
-      // Error handled in useEffect
-    }
+    registerUser(data, {
+      onSuccess: () => {
+        reset();
+        navigate("/login");
+      },
+    });
   };
 
   return (

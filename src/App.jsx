@@ -124,8 +124,8 @@ function App() {
               <Route path="/training" element={<TrainingHub />} />
               <Route path="/gallery" element={<GalleryPage />}/>
               <Route path="/initiatives/:id" element={<InitiativeDetail />}/>
-              <Route path="/event-register" element={<EventRegister />} />
-              <Route path="volunteer-registration" element={<VolunteerRegistration />}/>
+              {/* <Route path="/event-register" element={<EventRegister />} />
+              <Route path="volunteer-registration" element={<VolunteerRegistration />}/> */}
               <Route path="/assistive-tech" element={<AssistiveTechPage />} />
             </Route>
 

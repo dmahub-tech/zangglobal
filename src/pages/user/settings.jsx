@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
+import { useAuthState, useUpdateProfile, useChangePassword } from '../../hooks';
 
 const UserSettingsPage = () => {
-  const dispatch = useDispatch();
-  const { user, loading} = useSelector((state) => state.auth.user);
+  const { data: authState } = useAuthState();
+  const { user } = authState || {};
+  const { mutate: updateProfile, isLoading: isUpdatingProfile } = useUpdateProfile();
+  const { mutate: changePassword, isLoading: isChangingPassword } = useChangePassword();
+
   const [formData, setFormData] = useState({
     email: '',
     currentPassword: '',
@@ -53,12 +56,7 @@ const UserSettingsPage = () => {
       toast.error('Please enter a valid email');
       return;
     }
-    try {
-    //   await dispatch(updateUser({ email: formData.email }));
-      toast.success('Email updated successfully');
-    } catch (err) {
-      toast.error(err.message || 'Failed to update email');
-    }
+    updateProfile({ userId: user.userId, userData: { email: formData.email } });
   };
 
   const handleSubmitPassword = async (e) => {
@@ -67,21 +65,19 @@ const UserSettingsPage = () => {
       toast.error('Passwords do not match');
       return;
     }
-    try {
-    //   await dispatch(changePassword({
-    //     currentPassword: formData.currentPassword,
-    //     newPassword: formData.newPassword,
-    //   }));
-      toast.success('Password changed successfully');
-      setFormData({
-        ...formData,
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: '',
-      });
-    } catch (err) {
-      toast.error(err.message || 'Failed to change password');
-    }
+    changePassword({
+      currentPassword: formData.currentPassword,
+      newPassword: formData.newPassword,
+    }, {
+      onSuccess: () => {
+        setFormData({
+          ...formData,
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: '',
+        });
+      }
+    });
   };
 
   const handleUploadImage = async (e) => {
@@ -90,14 +86,9 @@ const UserSettingsPage = () => {
       toast.error('Please select an image');
       return;
     }
-    try {
-      const formData = new FormData();
-      formData.append('profileImage', profileImage);
-    //   await dispatch(uploadProfileImage(formData));
-      toast.success('Profile image updated successfully');
-    } catch (err) {
-      toast.error(err.message || 'Failed to upload image');
-    }
+    const formData = new FormData();
+    formData.append('profileImage', profileImage);
+    updateProfile({ userId: user.userId, userData: formData });
   };
 
   return (
