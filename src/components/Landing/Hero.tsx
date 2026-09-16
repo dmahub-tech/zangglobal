@@ -1,8 +1,8 @@
-import { Link } from "react-router-dom";
 import sampleImg from "../../assets/images/zang.jpg";
 import backgroundimage from "../../assets/images/Home.jpg";
 import React, { useState, useEffect } from "react";
 import { TypeAnimation } from "react-type-animation";
+import { motion } from "framer-motion";
 
 function Hero() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -51,7 +51,7 @@ function Hero() {
       ></div>
 
       {/* Left Content */}
-      <div className="flex flex-col gap-6 text-center md:text-left max-w-lg z-10">
+      <motion.div className="flex flex-col gap-6 text-center md:text-left max-w-lg z-10" initial={{ opacity: 0, x: -24 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.55 }}>
         <h3 className="text-3xl md:text-4xl font-bold text-secondary">
           The Power of Innovation
         </h3>
@@ -86,23 +86,18 @@ function Hero() {
         />
 
        
-      </div>
+      </motion.div>
 
-      {/* Right Content (Random but Suitable Content) */}
-      <div className="flex flex-col items-center justify-center z-10 text-center border-[1px]  lg:hover:scale-105 transition-all delay-75 ease-in-out bg-white/40 p-6 rounded-lg shadow-lg max-w-sm w-full">
-        <h2 className="text-2xl font-semibold text-primary mb-4">Our Latest Product</h2>
+      {/* Supporting message */}
+      <motion.div className="flex flex-col items-center justify-center z-10 text-center border-[1px] lg:hover:scale-105 transition-all delay-75 ease-in-out bg-white/40 p-6 rounded-lg shadow-lg max-w-sm w-full" initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.55, delay: 0.12 }}>
+        <h2 className="text-2xl font-semibold text-primary mb-4">Our Latest Work</h2>
         <p className="text-mutedSecondary mb-6">
-          Explore our new range of eco-friendly power solutions designed to power your devices while protecting the planet. Discover more today!
+          Explore the people, training, and practical innovations shaping Zang Global’s work.
         </p>
-        <Link to={"/store"} className="bg-secondary text-primary px-4 py-2 rounded-md font-semibold transition duration-300 hover:bg-opacity-80">
-          Shop Now 
-        </Link>
-      </div>
+      </motion.div>
     </section>
   );
 }
 
 export default Hero;
-
-
 

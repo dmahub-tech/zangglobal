@@ -50,14 +50,6 @@ const Footer = () => {
             </li>
             <li>
               <a
-                href="/store"
-                className="hover:underline hover:text-mutedSecondary transition duration-200"
-              >
-                Shop
-              </a>
-            </li>
-            <li>
-              <a
                 href="/#contact"
                 className="hover:underline hover:text-mutedSecondary transition duration-200"
               >

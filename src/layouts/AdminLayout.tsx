@@ -211,13 +211,6 @@ const AdminLayout = ({ children, adminOnly = false }) => {
                 <span>Add Product</span>
               </button>
 
-              <Link
-                to="/"
-                className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                <span>View Store</span>
-              </Link>
-
               <button
                 onClick={logout}
                 className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"

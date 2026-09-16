@@ -1,248 +1,54 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import api from "../config/api";
 
-// Query Keys
 export const GALLERY_QUERY_KEYS = {
   all: ["gallery"],
-  lists: () => [...GALLERY_QUERY_KEYS.all, "list"],
-  list: (filters) => [...GALLERY_QUERY_KEYS.lists(), filters],
-  details: () => [...GALLERY_QUERY_KEYS.all, "detail"],
-  detail: (id) => [...GALLERY_QUERY_KEYS.details(), id],
-  categories: () => [...GALLERY_QUERY_KEYS.all, "categories"],
+  list: (scope, filters) => ["gallery", scope, filters],
+  metadata: ["gallery", "metadata"],
+  cohorts: ["gallery", "cohorts"],
 };
 
-// API Functions
+const adminHeaders = () => ({ Authorization: `Bearer ${JSON.parse(localStorage.getItem("token") || "null") || localStorage.getItem("adminToken") || ""}` });
 const galleryApi = {
-  // Get all gallery items
-  getGalleryItems: async (params = {}) => {
-    const response = await api.get("/gallery", { params });
-    return response.data;
-  },
-
-  // Get gallery item by ID
-  getGalleryItem: async (id) => {
-    const response = await api.get(`/gallery/${id}`);
-    return response.data;
-  },
-
-  // Get gallery categories
-  getGalleryCategories: async () => {
-    const response = await api.get("/gallery/categories");
-    return response.data;
-  },
-
-  // Create gallery item
-  createGalleryItem: async (itemData) => {
-    const response = await api.post("/gallery", itemData, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-      },
-    });
-    return response.data;
-  },
-
-  // Update gallery item
-  updateGalleryItem: async ({ id, ...itemData }) => {
-    const response = await api.put(`/gallery/${id}`, itemData, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-      },
-    });
-    return response.data;
-  },
-
-  // Delete gallery item
-  deleteGalleryItem: async (id) => {
-    const response = await api.delete(`/gallery/${id}`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-      },
-    });
-    return response.data;
-  },
-
-  // Upload gallery image
-  uploadGalleryImage: async (imageFile) => {
+  list: (params = {}, admin = false) => api.get(admin ? "/gallery/admin/all" : "/gallery", { params }).then((response) => response.data),
+  metadata: () => api.get("/gallery/categories").then((response) => response.data),
+  cohorts: () => api.get("/gallery/cohorts").then((response) => response.data),
+  create: (data) => api.post("/gallery", data, { headers: adminHeaders() }).then((response) => response.data),
+  update: ({ id, ...data }) => api.patch(`/gallery/${id}`, data, { headers: adminHeaders() }).then((response) => response.data),
+  remove: (id) => api.delete(`/gallery/${id}`, { headers: adminHeaders() }).then((response) => response.data),
+  upload: (file) => {
     const formData = new FormData();
-    formData.append("image", imageFile);
-    
-    const response = await api.post("/gallery/upload", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-        Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-      },
-    });
-    return response.data;
+    formData.append("image", file);
+    return api.post("/gallery/upload", formData, { headers: { ...adminHeaders(), "Content-Type": "multipart/form-data" } }).then((response) => response.data);
   },
+  createCohort: (data) => api.post("/gallery/cohorts", data, { headers: adminHeaders() }).then((response) => response.data),
 };
 
-// Custom Hooks
+export const useGalleryItems = (filters = {}, admin = false) => useQuery({
+  queryKey: GALLERY_QUERY_KEYS.list(admin ? "admin" : "public", filters),
+  queryFn: () => galleryApi.list(filters, admin),
+  select: (data) => ({ items: data.data, pagination: data.pagination }),
+  placeholderData: (previous) => previous,
+});
 
-/**
- * Hook to fetch gallery items with optional filtering
- */
-export const useGalleryItems = (filters = {}) => {
-  return useQuery({
-    queryKey: GALLERY_QUERY_KEYS.list(filters),
-    queryFn: () => galleryApi.getGalleryItems(filters),
-    select: (data) => data.data, // Extract the actual gallery items from response
-  });
-};
+export const useGalleryMetadata = () => useQuery({
+  queryKey: GALLERY_QUERY_KEYS.metadata,
+  queryFn: galleryApi.metadata,
+  select: (data) => data.data,
+  staleTime: 15 * 60 * 1000,
+});
 
-/**
- * Hook to fetch active gallery items for public display
- */
-export const usePublicGalleryItems = (category = null) => {
-  const filters = { isActive: true };
-  if (category && category !== "all") {
-    filters.category = category;
-  }
+export const useCohorts = () => useQuery({ queryKey: GALLERY_QUERY_KEYS.cohorts, queryFn: galleryApi.cohorts, select: (data) => data.data });
+export const usePublicGalleryItems = (filters = {}) => useGalleryItems(filters);
 
-  return useQuery({
-    queryKey: GALLERY_QUERY_KEYS.list(filters),
-    queryFn: () => galleryApi.getGalleryItems(filters),
-    select: (data) => data.data,
-  });
-};
-
-/**
- * Hook to fetch a single gallery item by ID
- */
-export const useGalleryItem = (id, enabled = true) => {
-  return useQuery({
-    queryKey: GALLERY_QUERY_KEYS.detail(id),
-    queryFn: () => galleryApi.getGalleryItem(id),
-    select: (data) => data.data,
-    enabled: Boolean(id) && enabled,
-  });
-};
-
-/**
- * Hook to fetch gallery categories
- */
-export const useGalleryCategories = () => {
-  return useQuery({
-    queryKey: GALLERY_QUERY_KEYS.categories(),
-    queryFn: galleryApi.getGalleryCategories,
-    select: (data) => data.data,
-    staleTime: 1000 * 60 * 15, // 15 minutes - categories don't change often
-  });
-};
-
-/**
- * Hook to create a new gallery item
- */
-export const useCreateGalleryItem = () => {
+const invalidateGallery = (queryClient) => queryClient.invalidateQueries({ queryKey: GALLERY_QUERY_KEYS.all });
+const mutation = (mutationFn, message) => () => {
   const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: galleryApi.createGalleryItem,
-    onSuccess: (data) => {
-      // Invalidate and refetch gallery lists
-      queryClient.invalidateQueries({ queryKey: GALLERY_QUERY_KEYS.lists() });
-      
-      // Optionally add the new item to the cache
-      queryClient.setQueryData(
-        GALLERY_QUERY_KEYS.detail(data.data.galleryId),
-        { data: data.data }
-      );
-
-      toast.success("Gallery item created successfully");
-    },
-    onError: (error) => {
-      const errorMessage = error?.response?.data?.message || "Failed to create gallery item";
-      toast.error(errorMessage);
-    },
-  });
+  return useMutation({ mutationFn, onSuccess: () => { invalidateGallery(queryClient); toast.success(message); }, onError: (error) => toast.error(error?.response?.data?.message || "Unable to update gallery content") });
 };
-
-/**
- * Hook to update a gallery item
- */
-export const useUpdateGalleryItem = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: galleryApi.updateGalleryItem,
-    onSuccess: (data, variables) => {
-      // Invalidate and refetch gallery lists
-      queryClient.invalidateQueries({ queryKey: GALLERY_QUERY_KEYS.lists() });
-      
-      // Update the specific item in the cache
-      queryClient.setQueryData(
-        GALLERY_QUERY_KEYS.detail(variables.id),
-        { data: data.data }
-      );
-
-      toast.success("Gallery item updated successfully");
-    },
-    onError: (error) => {
-      const errorMessage = error?.response?.data?.message || "Failed to update gallery item";
-      toast.error(errorMessage);
-    },
-  });
-};
-
-/**
- * Hook to delete a gallery item
- */
-export const useDeleteGalleryItem = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: galleryApi.deleteGalleryItem,
-    onSuccess: (data, galleryId) => {
-      // Remove from all list queries
-      queryClient.invalidateQueries({ queryKey: GALLERY_QUERY_KEYS.lists() });
-      
-      // Remove the specific item from cache
-      queryClient.removeQueries({ queryKey: GALLERY_QUERY_KEYS.detail(galleryId) });
-
-      toast.success("Gallery item deleted successfully");
-    },
-    onError: (error) => {
-      const errorMessage = error?.response?.data?.message || "Failed to delete gallery item";
-      toast.error(errorMessage);
-    },
-  });
-};
-
-/**
- * Hook to upload gallery image
- */
-export const useUploadGalleryImage = () => {
-  return useMutation({
-    mutationFn: galleryApi.uploadGalleryImage,
-    onError: (error) => {
-      const errorMessage = error?.response?.data?.message || "Failed to upload image";
-      toast.error(errorMessage);
-    },
-  });
-};
-
-/**
- * Hook to prefetch gallery data (useful for performance optimization)
- */
-export const usePrefetchGalleryItems = () => {
-  const queryClient = useQueryClient();
-
-  const prefetchGalleryItems = (filters = {}) => {
-    queryClient.prefetchQuery({
-      queryKey: GALLERY_QUERY_KEYS.list(filters),
-      queryFn: () => galleryApi.getGalleryItems(filters),
-    });
-  };
-
-  const prefetchGalleryCategories = () => {
-    queryClient.prefetchQuery({
-      queryKey: GALLERY_QUERY_KEYS.categories(),
-      queryFn: galleryApi.getGalleryCategories,
-    });
-  };
-
-  return {
-    prefetchGalleryItems,
-    prefetchGalleryCategories,
-  };
-};
+export const useCreateGalleryItem = mutation(galleryApi.create, "Gallery entry created");
+export const useUpdateGalleryItem = mutation(galleryApi.update, "Gallery entry updated");
+export const useDeleteGalleryItem = mutation(galleryApi.remove, "Gallery entry deleted");
+export const useCreateCohort = mutation(galleryApi.createCohort, "Cohort created");
+export const useUploadGalleryImage = () => useMutation({ mutationFn: galleryApi.upload, onError: (error) => toast.error(error?.response?.data?.message || "Unable to upload image. Check the file type and maximum file size.") });

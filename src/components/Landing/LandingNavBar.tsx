@@ -30,7 +30,6 @@ const navItems = {
     },
   ],
   footer: [
-    { path: "/store", label: "Shop" },
     { path: "/blogs", label: "Blog" },
     { path: "/gallery", label: "Gallery" },
   ],
@@ -201,6 +200,16 @@ const Dropdown = ({ items, label, isMobile, onClose }) => {
 
 // Mobile Menu
 const MobileMenu = ({ isOpen, setIsOpen, onClose }) => {
+  const closeButtonRef = useRef(null);
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    const previousOverflow = document.body.style.overflow;
+    const onKeyDown = (event) => event.key === "Escape" && onClose();
+    document.body.style.overflow = "hidden";
+    document.addEventListener("keydown", onKeyDown);
+    closeButtonRef.current?.focus();
+    return () => { document.body.style.overflow = previousOverflow; document.removeEventListener("keydown", onKeyDown); };
+  }, [isOpen, onClose]);
   const menuVariants = {
     open: { x: 0 },
     closed: { x: "-100%" },
@@ -210,14 +219,15 @@ const MobileMenu = ({ isOpen, setIsOpen, onClose }) => {
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className="fixed inset-0 bg-primary/95 text-secondary px-6 py-20 z-50 flex flex-col space-y-5 overflow-y-auto"
+          id="mobile-navigation" role="dialog" aria-modal="true" aria-label="Main navigation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}
+          className="fixed inset-0 bg-primary/95 text-secondary px-5 py-6 z-50 flex flex-col space-y-5 overflow-y-auto"
           initial="closed"
           animate="open"
           exit="closed"
           variants={menuVariants}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
         >
-          <button onClick={() => setIsOpen(false)} className="self-end mb-6">
+          <button ref={closeButtonRef} type="button" aria-label="Close navigation menu" onClick={() => setIsOpen(false)} className="self-end mb-6 p-2">
             <X />
           </button>
           {navItems.main.map((item, index) => (
@@ -275,14 +285,14 @@ const Navbar = () => {
       transition={{ type: "spring", stiffness: 300, damping: 24 }}
     >
       {/* Logo */}
-      <Link to="/" className="z-50">
+      <Link to="/" aria-label="Zang Global home" className="z-50 shrink-0">
         <motion.img
           src={logo}
           alt="Logo"
           width={100}
           height={50}
           loading="lazy"
-          className="h-auto"
+          className="h-auto max-h-10 w-auto sm:max-h-12"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         />
@@ -317,8 +327,8 @@ const Navbar = () => {
       {/* Mobile button */}
       <motion.button
         onClick={toggleMenu}
-        aria-label="Toggle menu"
-        className="md:hidden text-3xl z-50 text-secondary"
+        aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"} aria-expanded={mobileMenuOpen} aria-controls="mobile-navigation"
+        className="md:hidden text-3xl z-50 text-secondary p-2"
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
       >

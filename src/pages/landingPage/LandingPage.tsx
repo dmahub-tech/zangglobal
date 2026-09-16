@@ -10,6 +10,7 @@ import PartnersAndAwards from "../../components/Landing/PartnersAndAwards";
 import OurTeam from "../../components/Landing/Team";
 import EventLanding from "../../components/Landing/EventSection";
 import VolunteerSection from "../../components/Landing/VoluteerSection";
+import FeaturedGallery from "../../components/gallery/FeaturedGallery";
 
 const LandingPage = () => {
   const Counter = ({ startValue, endValue }) => {
@@ -48,10 +49,10 @@ const LandingPage = () => {
 
   const Achievements = () => {
     return (
-      <section
+      <motion.section
         id="achievements"
         className="w-full h-screen md:h-[60vh] flex flex-col bg-primary px-6 md:px-10 items-center justify-center py-16"
-      >
+        initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.15 }} transition={{ duration: 0.45 }}>
         <motion.h2
           className="text-3xl md:text-4xl font-bold text-secondary mb-8"
           initial={{ opacity: 0, y: -50 }}
@@ -92,7 +93,7 @@ const LandingPage = () => {
             <p>Trained IDPs on green skills </p>
           </motion.div>
         </div>
-      </section>
+      </motion.section>
     );
   };
 
@@ -105,7 +106,7 @@ const LandingPage = () => {
 
       {/* <VolunteerSection /> */}
       {/* why us */}
-      <section
+      <motion.section
         id="why-us"
         className="bg-mutedSecondary text-primary flex flex-col items-center justify-center md:h-[70vh] p-16 w-full"
       >
@@ -116,16 +117,16 @@ const LandingPage = () => {
         </p>
         <div className="flex flex-wrap gap-5 justify-center mt-6">
           {whyUs.map((item, index) => (
-            <div
+            <motion.div
               className="bg-primary md:p-4 p-4 text-secondary font-bold rounded-md border border-secondary flex items-center flex-col shadow-md md:w-40 w-60 text-center"
               key={index}
-            >
+              initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} whileHover={{ y: -3 }} transition={{ duration: 0.25 }}>
               <FaCheckCircle size={35} />
               <p className="text-center text-xs md:text-lg">{item.title}</p>
-            </div>
+            </motion.div>
           ))}
         </div>
-      </section>
+      </motion.section>
 
       <Achievements />
 
@@ -134,6 +135,7 @@ const LandingPage = () => {
         <Carousel />
       </section>
       <About />
+      <FeaturedGallery />
 
       <div id="contact">
         <ContactUs />
